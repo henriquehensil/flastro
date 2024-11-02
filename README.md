@@ -1,2 +1,1 @@
-# jdata
-a prototype database developed in Java, implemented internally using objects. It has standard database functionality, such as creating and manipulating tables, as well as offering new forms of storage to meet different needs.
+jdata provides a foundation for the development and testing of new concepts in data storage and manipulation. Ideal for those who want to explore and understand the structure and operation of a database in a controlled and customizable environment.

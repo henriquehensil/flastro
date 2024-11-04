@@ -1,6 +1,7 @@
 .idea
 out
 target
+thoughts.txt
 
 # Compiled class file
 *.class

@@ -1,6 +1,7 @@
 package ghostface.dev;
 
 import ghostface.dev.exception.ColumnException;
+import ghostface.dev.exception.DataException;
 import ghostface.dev.storage.FileStorage;
 import ghostface.dev.table.Table;
 import ghostface.dev.table.column.Column;
@@ -16,6 +17,6 @@ public interface Data {
 
     <E> @UnknownNullability E get(@NotNull Column<E> column) throws IllegalArgumentException;
 
-    <E> void set(@NotNull Column<E> column, @Nullable E value) throws ColumnException;
+    <E> void set(@NotNull Column<E> column, @Nullable E value) throws ColumnException, DataException;
 
 }

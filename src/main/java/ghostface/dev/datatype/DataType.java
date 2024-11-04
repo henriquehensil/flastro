@@ -5,10 +5,10 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 
-public interface DataType {
+public interface DataType<T> {
 
-    @NotNull Object read(@NotNull InputStream stream) throws IOException;
+    @NotNull T read(@NotNull InputStream stream) throws IOException;
 
-    @NotNull Object read(byte @NotNull [] bytes);
+    @NotNull T read(byte @NotNull [] bytes);
 
 }

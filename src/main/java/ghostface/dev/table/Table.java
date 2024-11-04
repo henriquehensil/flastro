@@ -1,18 +1,25 @@
 package ghostface.dev.table;
 
+import ghostface.dev.Data;
+import ghostface.dev.exception.TableException;
 import ghostface.dev.table.column.Columns;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
+
+import java.util.List;
 
 public interface Table {
 
-    @NotNull Columns getColumns();
-
     @NotNull String getName();
 
-    @NotNull Object getData(int row);
+    @NotNull Columns getColumns();
 
-    boolean equals(@Nullable Object o);
+    @NotNull Data getData(int row);
 
-    int hashCode();
+    boolean add(@NotNull Data data) throws TableException;
+
+    boolean remove(@NotNull Data data) throws TableException;
+
+    @Unmodifiable @NotNull List<Data> getElements();
+
 }

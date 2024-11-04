@@ -1,24 +1,19 @@
 package ghostface.dev.database;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.net.InetAddress;
 
 public interface Authentication {
 
-    @NotNull String getUsername();
+    @NotNull String username();
 
-    @NotNull String getPassword();
+    @NotNull String password();
 
-    @NotNull InetAddress getAddress();
+    @NotNull InetAddress hostname();
 
-    int getPort();
+    @Range(from = 0, to = 65535)
+    int port();
 
-    void setUsername(@NotNull String username) throws IllegalStateException;
-
-    void setPassword(@NotNull String password) throws IllegalStateException;
-
-    void setAddress(@NotNull InetAddress address) throws IllegalStateException;
-
-    void setPort(int port);
 }

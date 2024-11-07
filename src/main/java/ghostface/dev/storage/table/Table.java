@@ -1,12 +1,12 @@
-package ghostface.dev.table;
+package ghostface.dev.storage.table;
 
-import ghostface.dev.Data;
 import ghostface.dev.exception.TableException;
-import ghostface.dev.table.column.Columns;
+import ghostface.dev.storage.table.column.Columns;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.List;
+import java.util.Collection;
+import java.util.UUID;
 
 public interface Table {
 
@@ -16,10 +16,12 @@ public interface Table {
 
     @NotNull Data getData(int row);
 
+    @NotNull Data getData(@NotNull UUID uuid);
+
     boolean add(@NotNull Data data) throws TableException;
 
     boolean remove(@NotNull Data data) throws TableException;
 
-    @Unmodifiable @NotNull List<Data> getElements();
+    @Unmodifiable @NotNull Collection<Data> getElements();
 
 }

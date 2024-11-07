@@ -1,19 +1,20 @@
-package ghostface.dev;
+package ghostface.dev.storage.table;
 
 import ghostface.dev.exception.ColumnException;
 import ghostface.dev.exception.DataException;
-import ghostface.dev.storage.FileStorage;
-import ghostface.dev.table.Table;
-import ghostface.dev.table.column.Column;
+import ghostface.dev.storage.table.column.Column;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
-public interface Data {
+import java.io.Serializable;
+import java.util.UUID;
+
+public interface Data extends Serializable {
+
+    @NotNull UUID getUniqueId();
 
     @NotNull Table getTable();
-
-    @NotNull FileStorage getFileStorage();
 
     <E> @UnknownNullability E get(@NotNull Column<E> column) throws IllegalArgumentException;
 

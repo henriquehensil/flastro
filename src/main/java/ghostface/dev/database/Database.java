@@ -1,15 +1,18 @@
 package ghostface.dev.database;
 
-import ghostface.dev.storage.FilesStorages;
-import ghostface.dev.table.Tables;
+import ghostface.dev.storage.nest.NestStorage;
+import ghostface.dev.storage.file.FileStorage;
+import ghostface.dev.storage.table.TableStorage;
 import org.jetbrains.annotations.NotNull;
 
 public interface Database {
 
     @NotNull Authentication getAuthentication();
 
-    @NotNull Tables getTables();
+    @NotNull TableStorage getTableStorage();
 
-    @NotNull FilesStorages getStorages();
+    @NotNull FileStorage getFileStorage();
+
+    @NotNull NestStorage getBoxStorage();
 
 }

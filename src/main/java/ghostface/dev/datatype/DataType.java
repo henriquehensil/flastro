@@ -121,6 +121,4 @@ public interface DataType<T> {
 
     @NotNull T read(@NotNull InputStream stream) throws IOException, DataTypeException;
 
-    @NotNull Class<T> getVariable();
-
 }

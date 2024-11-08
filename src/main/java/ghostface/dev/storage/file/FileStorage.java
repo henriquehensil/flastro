@@ -3,18 +3,25 @@ package ghostface.dev.storage.file;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface FileStorage {
 
-    @NotNull Optional<File> get(@NotNull Path path);
+    @NotNull Path getDefault();
 
-    @NotNull CompletableFuture<Boolean> add(@NotNull File file);
+    @NotNull Optional<File> get(@NotNull String name);
 
-    @NotNull CompletableFuture<Boolean> remove(@NotNull File file);
+    @NotNull Optional<File> get(@NotNull Path name);
 
-    @NotNull CompletableFuture<Boolean> remove(@NotNull Path path);
+    @NotNull CompletableFuture<Boolean> save(@NotNull String name, @NotNull InputStream stream);
+
+    @NotNull CompletableFuture<Boolean> delete(@NotNull String name);
+
+    @NotNull CompletableFuture<Boolean> delete(@NotNull Path path);
+
+    @NotNull CompletableFuture<Boolean> deleteAll();
 
 }

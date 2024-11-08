@@ -1,23 +1,25 @@
 package ghostface.dev.storage.table;
 
-import ghostface.dev.exception.ColumnException;
-import ghostface.dev.exception.DataException;
-import ghostface.dev.storage.table.column.Column;
+import ghostface.dev.exception.table.ColumnException;
+import ghostface.dev.exception.DataTypeException;
+import ghostface.dev.exception.NonCorrespondingException;
+import ghostface.dev.exception.table.TableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.UnknownNullability;
 
 import java.io.Serializable;
-import java.util.UUID;
 
 public interface Data extends Serializable {
 
-    @NotNull UUID getUniqueId();
+    @NotNull String getUniqueId();
 
     @NotNull Table getTable();
 
-    <E> @UnknownNullability E get(@NotNull Column<E> column) throws IllegalArgumentException;
+    <E> @UnknownNullability E get(@NotNull Column<E> column) throws NonCorrespondingException;
 
-    <E> void set(@NotNull Column<E> column, @Nullable E value) throws ColumnException, DataException;
+    <E> boolean add(@NotNull Column<E> column, @Nullable E value) throws TableException, ColumnException, NonCorrespondingException;
+
+    <E> void set(@NotNull Column<E> column, @Nullable E value) throws ColumnException, DataTypeException, NonCorrespondingException;
 
 }

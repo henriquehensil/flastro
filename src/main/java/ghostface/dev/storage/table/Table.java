@@ -1,27 +1,22 @@
 package ghostface.dev.storage.table;
 
-import ghostface.dev.exception.TableException;
-import ghostface.dev.storage.table.column.Columns;
+import ghostface.dev.exception.table.TableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collection;
-import java.util.UUID;
+import java.util.*;
 
 public interface Table {
 
     @NotNull String getName();
 
-    @NotNull Columns getColumns();
-
-    @NotNull Data getData(int row);
-
-    @NotNull Data getData(@NotNull UUID uuid);
+    @NotNull Optional<? extends Data> getData(int row);
 
     boolean add(@NotNull Data data) throws TableException;
 
     boolean remove(@NotNull Data data) throws TableException;
 
-    @Unmodifiable @NotNull Collection<Data> getElements();
+    @Unmodifiable @NotNull Collection<? extends Data> getElements();
 
+    @Unmodifiable @NotNull Collection<? extends Column<?>> getColumns();
 }

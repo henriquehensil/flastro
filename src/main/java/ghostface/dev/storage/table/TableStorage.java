@@ -13,8 +13,4 @@ public interface TableStorage {
 
     boolean remove(@NotNull Table table);
 
-    default boolean contains(@NotNull Table table) {
-        return get(table.getName()).isPresent();
-    }
-
 }

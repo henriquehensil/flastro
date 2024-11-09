@@ -18,6 +18,10 @@ public interface DataType<T> {
                 throw new DataTypeException("Data is null", e);
             }
         }
+        @Override
+        public @NotNull Class<Boolean> getType() {
+            return boolean.class;
+        }
     };
 
     @NotNull DataType<@NotNull String> STRING = new DataType<String>() {
@@ -32,12 +36,12 @@ public interface DataType<T> {
                     builder.append(chars, 0, read);
                 }
 
-                if (builder.toString().trim().isEmpty()) {
-                    throw new DataTypeException("Data cannot be empty");
-                } else {
-                    return builder.toString();
-                }
+                return builder.toString();
             }
+        }
+        @Override
+        public @NotNull Class<String> getType() {
+            return String.class;
         }
     };
 
@@ -50,6 +54,10 @@ public interface DataType<T> {
                 throw new DataTypeException("Data is null", e);
             }
         }
+        @Override
+        public @NotNull Class<Integer> getType() {
+            return int.class;
+        }
     };
 
     @NotNull DataType<@NotNull Double> DOUBLE = new DataType<Double>() {
@@ -60,6 +68,10 @@ public interface DataType<T> {
             } catch (EOFException e) {
                 throw new DataTypeException("Data is null", e);
             }
+        }
+        @Override
+        public @NotNull Class<Double> getType() {
+            return double.class;
         }
     };
 
@@ -72,6 +84,10 @@ public interface DataType<T> {
                 throw new DataTypeException("Data is null", e);
             }
         }
+        @Override
+        public @NotNull Class<Float> getType() {
+            return float.class;
+        }
     };
 
     @NotNull DataType<@NotNull Long> LONG = new DataType<Long>() {
@@ -83,6 +99,10 @@ public interface DataType<T> {
                 throw new DataTypeException("Data is null", e);
             }
         }
+        @Override
+        public @NotNull Class<Long> getType() {
+            return long.class;
+        }
     };
 
     @NotNull DataType<@NotNull Character> CHAR = new DataType<Character>() {
@@ -93,6 +113,10 @@ public interface DataType<T> {
             } catch (EOFException e) {
                 throw new DataTypeException("Data is null", e);
             }
+        }
+        @Override
+        public @NotNull Class<Character> getType() {
+            return char.class;
         }
     };
 
@@ -115,10 +139,15 @@ public interface DataType<T> {
                 return buffer.toByteArray();
             }
         }
+        @Override
+        public @NotNull Class<byte[]> getType() {
+            return byte[].class;
+        }
     };
 
     // Objects
 
     @NotNull T read(@NotNull InputStream stream) throws IOException, DataTypeException;
 
+    @NotNull Class<T> getType();
 }

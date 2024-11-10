@@ -1,7 +1,8 @@
-package ghostface.dev.storage.table;
+package ghostface.dev.storage.table.column;
 
 import ghostface.dev.datatype.DataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 public interface Column<T> {
 
@@ -10,6 +11,8 @@ public interface Column<T> {
     boolean isKey();
 
     boolean isNullable();
+
+    @UnknownNullability T getDefaultValue();
 
     @NotNull DataType<T> getDataType();
 

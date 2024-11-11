@@ -1,16 +1,19 @@
 package ghostface.dev.storage.table;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.Collection;
 import java.util.Optional;
-
 
 public interface TableStorage {
 
-    @NotNull Optional<Table> get(@NotNull String name);
+    @NotNull Optional<? extends Table> get(@NotNull String name);
 
-    boolean add(@NotNull Table table);
+    void put(@NotNull String key, @NotNull Table table);
 
-    boolean remove(@NotNull Table table);
+    boolean remove(@NotNull String key);
+
+    @Unmodifiable @NotNull Collection<? extends Table> toCollection();
 
 }

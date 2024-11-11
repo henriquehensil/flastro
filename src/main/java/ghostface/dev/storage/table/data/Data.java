@@ -19,6 +19,6 @@ public interface Data extends Serializable {
 
     <E> @UnknownNullability E get(@NotNull Column<E> column) throws NonCorrespondingException;
 
-    <E> void set(@NotNull Column<E> column, @Nullable E value) throws ColumnException, DataTypeException, NonCorrespondingException;
+    <E> void set(@NotNull Column<E> column, @Nullable E value) throws ColumnException, NonCorrespondingException;
 
 }

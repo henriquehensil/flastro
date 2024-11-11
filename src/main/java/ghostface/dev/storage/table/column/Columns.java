@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
+import java.util.Optional;
 
 public interface Columns {
 
@@ -18,6 +19,8 @@ public interface Columns {
 
     @NotNull Column<?> delete(@NotNull String name);
 
-    @Unmodifiable @NotNull Collection<Column<?>> toCollection();
+    @NotNull Optional<? extends Column<?>> get(@NotNull String name);
+
+    @Unmodifiable @NotNull Collection<? extends Column<?>> toCollection();
 
 }

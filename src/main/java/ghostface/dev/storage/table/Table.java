@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 
 public interface Table {
 
-    @NotNull String getName();
-
     @NotNull Datas getElements();
 
     @NotNull Columns getColumns();

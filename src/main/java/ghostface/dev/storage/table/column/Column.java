@@ -2,7 +2,6 @@ package ghostface.dev.storage.table.column;
 
 import ghostface.dev.datatype.DataType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.UnknownNullability;
 
 public interface Column<T> {
 
@@ -13,5 +12,7 @@ public interface Column<T> {
     boolean isKey();
 
     boolean isNullable();
+
+    void setName(@NotNull String name);
 
 }

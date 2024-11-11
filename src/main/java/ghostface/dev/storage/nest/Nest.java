@@ -3,18 +3,20 @@ package ghostface.dev.storage.nest;
 import ghostface.dev.datatype.DataType;
 import org.jetbrains.annotations.NotNull;
 
-public interface Nest<T> {
+import java.util.Optional;
 
-    @NotNull String getUniqueId();
+public interface Nest<T> {
 
     @NotNull DataType<T> getDataType();
 
-    boolean add(@NotNull String nestName, @NotNull Nest<?> nest);
+    <E> @NotNull Nest<E> createSub(@NotNull String name, @NotNull DataType<E> dataType);
 
-    boolean addValue(@NotNull T value);
+    @NotNull Optional<T> getValue(@NotNull String key);
 
-    boolean has(@NotNull String nestName);
+    void putValue(@NotNull String key, @NotNull T object);
 
-    <E> @NotNull Nest<E> get( @NotNull String nestName, @NotNull DataType<E> dataType);
+    <E> @NotNull Optional<? extends Nest<E>> getSub(@NotNull String name, @NotNull DataType<E> dataType);
+
+    void putSub(@NotNull String name, @NotNull Nest<?> nest);
 
 }

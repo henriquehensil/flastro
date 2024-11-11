@@ -3,10 +3,10 @@ package ghostface.dev.storage.file;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public interface FileStorage {
 
@@ -16,12 +16,12 @@ public interface FileStorage {
 
     @NotNull Optional<File> get(@NotNull Path name);
 
-    @NotNull CompletableFuture<Boolean> save(@NotNull String name, @NotNull InputStream stream);
+    boolean save(@NotNull String name, @NotNull InputStream stream) throws IOException;
 
-    @NotNull CompletableFuture<Boolean> delete(@NotNull String name);
+    boolean delete(@NotNull String name);
 
-    @NotNull CompletableFuture<Boolean> delete(@NotNull Path path);
+    boolean delete(@NotNull Path path);
 
-    @NotNull CompletableFuture<Boolean> deleteAll();
+    boolean deleteAll();
 
 }

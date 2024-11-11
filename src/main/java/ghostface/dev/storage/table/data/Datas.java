@@ -17,8 +17,8 @@ public interface Datas {
 
     @NotNull Data delete(int index);
 
-    @NotNull Optional<Data> get(int index);
+    @NotNull Optional<? extends Data> get(int index);
 
-    @Unmodifiable @NotNull Collection<Data> toCollection();
+    @Unmodifiable @NotNull Collection<? extends Data> toCollection();
 
 }

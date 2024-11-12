@@ -2,6 +2,7 @@ package ghostface.dev.providers;
 
 import ghostface.dev.datatype.DataType;
 import ghostface.dev.table.column.Column;
+import ghostface.dev.table.column.ColumnUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,13 +12,15 @@ public abstract class AbstractColumn<T> implements Column<T> {
 
     private @NotNull String name;
     private final @NotNull DataType<T> dataType;
+    private final @NotNull ColumnUtils<T> utils;
     private final boolean isKey;
     private final boolean isNullable;
 
-    protected AbstractColumn(@NotNull String name, @NotNull DataType<T> dataType, boolean isKey, boolean isNullable) {
+    protected AbstractColumn(@NotNull String name, @NotNull DataType<T> dataType, @NotNull ColumnUtils<T> utils, boolean isKey, boolean isNullable) {
         if (isKey && isNullable) throw new IllegalArgumentException("Key cannot be nullable");
         this.name = name;
         this.dataType = dataType;
+        this.utils = utils;
         this.isKey = isKey;
         this.isNullable = isNullable;
     }
@@ -35,6 +38,11 @@ public abstract class AbstractColumn<T> implements Column<T> {
     @Override
     public @NotNull DataType<T> getDataType() {
         return dataType;
+    }
+
+    @Override
+    public @NotNull ColumnUtils<T> getUtils() {
+        return utils;
     }
 
     @Override

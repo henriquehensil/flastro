@@ -7,7 +7,7 @@ public interface Column<T> {
 
     @NotNull String getName();
 
-    void setName(@NotNull String name);
+    @NotNull ColumnUtils<T> getUtils();
 
     @NotNull DataType<T> getDataType();
 
@@ -15,5 +15,6 @@ public interface Column<T> {
 
     boolean isNullable();
 
+    void setName(@NotNull String name);
 
 }

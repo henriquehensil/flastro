@@ -7,7 +7,7 @@ import java.io.*;
 
 public interface DataType<T> {
 
-    // primitives
+    // Static Initializers
 
     @NotNull DataType<@NotNull Boolean> BOOLEAN = new DataType<Boolean>() {
         @Override
@@ -19,11 +19,14 @@ public interface DataType<T> {
             }
         }
         @Override
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == Boolean.class || classz == boolean.class;
+        }
+        @Override
         public @NotNull Class<Boolean> getType() {
-            return boolean.class;
+            return Boolean.class;
         }
     };
-
     @NotNull DataType<@NotNull String> STRING = new DataType<String>() {
         @Override
         public @NotNull String read(@NotNull InputStream stream) throws IOException, DataTypeException {
@@ -40,11 +43,14 @@ public interface DataType<T> {
             }
         }
         @Override
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == String.class;
+        }
+        @Override
         public @NotNull Class<String> getType() {
             return String.class;
         }
     };
-
     @NotNull DataType<@NotNull Integer> INTEGER = new DataType<Integer>() {
         @Override
         public @NotNull Integer read(@NotNull InputStream stream) throws IOException, DataTypeException {
@@ -55,11 +61,14 @@ public interface DataType<T> {
             }
         }
         @Override
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == Integer.class || classz == int.class;
+        }
+        @Override
         public @NotNull Class<Integer> getType() {
-            return int.class;
+            return Integer.class;
         }
     };
-
     @NotNull DataType<@NotNull Double> DOUBLE = new DataType<Double>() {
         @Override
         public @NotNull Double read(@NotNull InputStream stream) throws IOException, DataTypeException {
@@ -70,11 +79,14 @@ public interface DataType<T> {
             }
         }
         @Override
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == Double.class || classz == double.class;
+        }
+        @Override
         public @NotNull Class<Double> getType() {
-            return double.class;
+            return Double.class;
         }
     };
-
     @NotNull DataType<@NotNull Float> FLOAT = new DataType<Float>() {
         @Override
         public @NotNull Float read(@NotNull InputStream stream) throws IOException, DataTypeException {
@@ -85,11 +97,14 @@ public interface DataType<T> {
             }
         }
         @Override
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == Float.class || classz == float.class;
+        }
+        @Override
         public @NotNull Class<Float> getType() {
-            return float.class;
+            return Float.class;
         }
     };
-
     @NotNull DataType<@NotNull Long> LONG = new DataType<Long>() {
         @Override
         public @NotNull Long read(@NotNull InputStream stream) throws IOException, DataTypeException {
@@ -100,11 +115,14 @@ public interface DataType<T> {
             }
         }
         @Override
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == Long.class || classz == long.class;
+        }
+        @Override
         public @NotNull Class<Long> getType() {
-            return long.class;
+            return Long.class;
         }
     };
-
     @NotNull DataType<@NotNull Character> CHAR = new DataType<Character>() {
         @Override
         public @NotNull Character read(@NotNull InputStream stream) throws IOException, DataTypeException {
@@ -115,11 +133,14 @@ public interface DataType<T> {
             }
         }
         @Override
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == Character.class || classz == char.class;
+        }
+        @Override
         public @NotNull Class<Character> getType() {
-            return char.class;
+            return Character.class;
         }
     };
-
     @NotNull DataType<byte []> BYTE_ARRAY = new DataType<byte @NotNull []>() {
         @Override
         public byte @NotNull [] read(@NotNull InputStream stream) throws IOException, DataTypeException {
@@ -140,7 +161,11 @@ public interface DataType<T> {
             }
         }
         @Override
-        public @NotNull Class<byte[]> getType() {
+        public boolean equalsType(@NotNull Class<?> classz) {
+            return classz == byte[].class;
+        }
+        @Override
+        public @NotNull Class<byte @NotNull []> getType() {
             return byte[].class;
         }
     };
@@ -150,4 +175,6 @@ public interface DataType<T> {
     @NotNull T read(@NotNull InputStream stream) throws IOException, DataTypeException;
 
     @NotNull Class<T> getType();
+
+    boolean equalsType(@NotNull Class<?> classz);
 }

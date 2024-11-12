@@ -1,8 +1,8 @@
-package ghostface.dev.storage.table.data;
+package ghostface.dev.table.data;
 
 import ghostface.dev.exception.table.DuplicatedKeyException;
 import ghostface.dev.exception.table.MissingKeyException;
-import ghostface.dev.storage.table.Table;
+import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -15,7 +15,7 @@ public interface Datas {
 
     @NotNull Data create(@NotNull Object @NotNull ... key) throws MissingKeyException, DuplicatedKeyException;
 
-    @NotNull Data delete(int index);
+    boolean remove(int index);
 
     @NotNull Optional<? extends Data> get(int index);
 

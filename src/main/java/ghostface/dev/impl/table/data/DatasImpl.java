@@ -4,6 +4,7 @@ import ghostface.dev.exception.table.DuplicatedKeyException;
 import ghostface.dev.exception.table.MissingKeyException;
 import ghostface.dev.impl.table.ColumnsImpl;
 import ghostface.dev.impl.table.TableImpl;
+import ghostface.dev.table.Key;
 import ghostface.dev.table.Table;
 import ghostface.dev.table.column.Column;
 import ghostface.dev.table.data.Datas;
@@ -13,7 +14,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 public final class DatasImpl implements Datas {
 
@@ -31,31 +32,27 @@ public final class DatasImpl implements Datas {
     }
 
     @Override
-    public @NotNull DataImpl create(@NotNull Object @NotNull ... key) throws MissingKeyException, DuplicatedKeyException {
-        @NotNull Set<Column<?>> keys = getColumns().getKeys();
-
-        if (!keys.isEmpty()) {
-            if (key.length == 0) {
-                throw new MissingKeyException("Key values is missing");
-            } else for (@NotNull Object obj : key) {
-                if (stream().anyMatch(data -> data.hasValue(obj))) {
-                    throw new DuplicatedKeyException("This key value is already in use");
-                }
-            }
-        }
+    public @NotNull DataImpl create(@NotNull Key<?> @NotNull ... keys) throws MissingKeyException, DuplicatedKeyException {
+        @NotNull DataImpl data = new DataImpl(getTable());
+        @NotNull List<Column<?>> rest = getColumns().toCollection().stream().filter(column -> !column.isKey()).collect(Collectors.toList());
 
         synchronized (this) {
-            @NotNull DataImpl data = new DataImpl(getTable());
-
-            if (!keys.isEmpty()) {
-                @NotNull Map<@NotNull Column<?>, @NotNull Object> map = new HashMap<>();
-                keys.forEach(column -> map.put(column, column.getUtils().generateValue(table)));
-                data.getValueMap().putAll(map);
+            for (@NotNull Column<?> column : rest) {
+                data.getValueMap().put(column, column.getUtils().getDefaultValue());
             }
 
-            for (@NotNull Column<?> column : getColumns().toCollection()) {
-                if (column.isKey()) continue;
-                data.getValueMap().put(column, column.getUtils().getDefaultValue());
+            if (keys.length > 0) {
+                if (keys.length != getColumns().getKeys().size()) {
+                    throw new MissingKeyException("The keys is missing or no provided");
+                }
+
+                for (@NotNull Key<?> key : keys) {
+                    if (table.getElements().toCollection().stream().anyMatch(element -> element.hasValue(key))) {
+                        throw new DuplicatedKeyException("Key already in use");
+                    } else {
+                        data.getValueMap().put(key.getColumn(), key.getValue());
+                    }
+                }
             }
 
             indexes.put(increment.incrementAndGet(), data);
@@ -80,10 +77,6 @@ public final class DatasImpl implements Datas {
 
     public @NotNull ColumnsImpl getColumns() {
         return table.getColumns();
-    }
-
-    public @NotNull Stream<DataImpl> stream() {
-        return toCollection().stream();
     }
 
     @Override

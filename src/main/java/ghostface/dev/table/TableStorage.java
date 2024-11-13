@@ -1,4 +1,4 @@
-package ghostface.dev.storage.table;
+package ghostface.dev.table;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface TableStorage {
+
+    @NotNull Table create(@NotNull String name);
 
     @NotNull Optional<? extends Table> get(@NotNull String name);
 

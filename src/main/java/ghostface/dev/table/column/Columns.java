@@ -1,8 +1,7 @@
-package ghostface.dev.storage.table.column;
-
+package ghostface.dev.table.column;
 
 import ghostface.dev.datatype.DataType;
-import ghostface.dev.storage.table.Table;
+import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 

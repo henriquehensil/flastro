@@ -1,4 +1,4 @@
-package ghostface.dev.storage.nest;
+package ghostface.dev.nest;
 
 import ghostface.dev.datatype.DataType;
 import org.jetbrains.annotations.NotNull;

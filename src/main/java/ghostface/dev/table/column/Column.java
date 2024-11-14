@@ -2,12 +2,13 @@ package ghostface.dev.table.column;
 
 import ghostface.dev.datatype.DataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnknownNullability;
 
 public interface Column<T> {
 
     @NotNull String getName();
 
-    @NotNull ColumnUtils<T> getUtils();
+    @UnknownNullability T getDefault();
 
     @NotNull DataType<T> getDataType();
 

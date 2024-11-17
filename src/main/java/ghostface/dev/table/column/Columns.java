@@ -3,6 +3,7 @@ package ghostface.dev.table.column;
 import ghostface.dev.DataType;
 import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import ghostface.dev.exception.NameAlreadyExists;
@@ -14,8 +15,9 @@ public interface Columns {
 
     /**
      * @throws NameAlreadyExists if name is already in use
+     * @throws IllegalArgumentException if the value is null and the isNullable parameter is false
      * */
-    <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, boolean isNullable) throws NameAlreadyExists;
+    <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws NameAlreadyExists, IllegalArgumentException;
 
     /**
      * @throws NameAlreadyExists if the name is already in use

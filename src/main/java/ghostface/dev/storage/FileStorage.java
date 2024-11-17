@@ -20,7 +20,9 @@ public interface FileStorage extends KeyContent<String, File> {
 
     @NotNull Path getDefault();
 
-    @NotNull CompletableFuture<Boolean> create(@NotNull String id, @NotNull InputStream inputStream);
+    @NotNull CompletableFuture<Boolean> create(@NotNull String name);
+
+    @NotNull CompletableFuture<Boolean> create(@NotNull String folder, @NotNull String name);
 
     // Implementations
 

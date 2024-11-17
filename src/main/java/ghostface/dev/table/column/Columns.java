@@ -15,7 +15,7 @@ public interface Columns {
     /**
      * @throws NameAlreadyExists if name is already in use
      * */
-    <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExists;
+    <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, boolean isNullable) throws NameAlreadyExists;
 
     /**
      * @throws NameAlreadyExists if the name is already in use

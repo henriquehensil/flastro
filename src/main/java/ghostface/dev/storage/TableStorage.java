@@ -16,7 +16,7 @@ public interface TableStorage extends KeyContent<String, Table> {
     // Implementations
 
     @Override
-    @NotNull Optional<@NotNull Table> get(@NotNull String id);
+    @NotNull Optional<? extends Table> get(@NotNull String id);
 
     @Override
     boolean put(@NotNull String id, @NotNull Table table);

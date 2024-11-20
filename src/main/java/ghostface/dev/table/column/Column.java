@@ -7,15 +7,12 @@ import org.jetbrains.annotations.UnknownNullability;
 
 public interface Column<T> {
 
-    boolean isKey();
-
     boolean isNullable();
-
-    // Getters
 
     @NotNull Table getTable();
 
     @NotNull String getName();
+
     void setName(@NotNull String name);
 
     @NotNull DataType<T> getDataType();

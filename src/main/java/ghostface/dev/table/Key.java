@@ -1,11 +1,11 @@
 package ghostface.dev.table;
 
-import ghostface.dev.table.column.Column;
+import ghostface.dev.table.column.KeyColumn;
 import org.jetbrains.annotations.NotNull;
 
 public interface Key<T> {
 
-    @NotNull Column<T> getColumn();
+    @NotNull KeyColumn<T> getColumn();
 
     @NotNull T getValue();
 }

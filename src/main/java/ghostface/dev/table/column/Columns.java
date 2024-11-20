@@ -23,7 +23,7 @@ public interface Columns {
      * @throws NameAlreadyExists if the name is already in use
      * @throws TableStateException if the table elements is not empty
      * */
-    <E> @NotNull Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExists, TableStateException;
+    <E> @NotNull KeyColumn<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExists, TableStateException;
 
     // Getters
 

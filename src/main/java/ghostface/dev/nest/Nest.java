@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface Nest<T> {
 
     /**
-     * @throws NameAlreadyExists if id already in use
+     * @throws NameAlreadyExists if the ID already in use
      * */
     <E> @NotNull Nest<E> createSub(@NotNull String id, @NotNull DataType<E> dataType) throws NameAlreadyExists;
 

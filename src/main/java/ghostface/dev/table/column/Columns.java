@@ -1,6 +1,7 @@
 package ghostface.dev.table.column;
 
 import ghostface.dev.DataType;
+import ghostface.dev.table.Key;
 import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,7 +24,13 @@ public interface Columns {
      * @throws NameAlreadyExists if the name is already in use
      * @throws TableStateException if the table elements is not empty
      * */
-    <E> @NotNull KeyColumn<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExists, TableStateException;
+    <E> @NotNull Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExists, TableStateException;
+
+    /**
+     * @return the Key associated with the specified value
+     * @throws IllegalArgumentException if the Key's column name does not exist in these columns
+     * */
+    <E> @NotNull Key<E> getKey(@NotNull String name, @NotNull E value) throws IllegalArgumentException;
 
     // Getters
 

@@ -6,7 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.File;
-import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;

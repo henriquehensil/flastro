@@ -9,6 +9,8 @@ public interface Column<T> {
 
     boolean isNullable();
 
+    boolean isKey();
+
     @NotNull Table getTable();
 
     @NotNull String getName();

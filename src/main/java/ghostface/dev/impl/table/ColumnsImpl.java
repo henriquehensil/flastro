@@ -12,6 +12,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ColumnsImpl implements Columns {
 
@@ -35,12 +36,10 @@ public final class ColumnsImpl implements Columns {
     public @NotNull <E> Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws NameAlreadyExists {
         if (get(name).isPresent()) {
             throw new NameAlreadyExists("Column name already exists: " + name);
-        } else {
+        } else synchronized (lock) {
             @NotNull ColumnImpl<E> column = new ColumnImpl<>(name, dataType, value, isNullable);
-            synchronized (lock) {
-                columnSet.add(column);
-                return column;
-            }
+            columnSet.add(column);
+            return column;
         }
     }
 
@@ -48,12 +47,12 @@ public final class ColumnsImpl implements Columns {
     public @NotNull <E> Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExists, TableStateException {
         if (get(name).isPresent()) {
             throw new NameAlreadyExists("Column name already exists: " + name);
-        } else {
+        } else if (table.getElements().size() > 0) {
+            throw new TableStateException("Cannot possible create new Key Columns now");
+        } else synchronized (lock) {
             @NotNull ColumnImpl<E> column = new ColumnImpl<>(name, dataType);
-            synchronized (lock) {
-                columnSet.add(column);
-                return column;
-            }
+            columnSet.add(column);
+            return column;
         }
     }
 
@@ -74,6 +73,10 @@ public final class ColumnsImpl implements Columns {
 
     public int size() {
         return toCollection().size();
+    }
+
+    public @NotNull Stream<Column<?>> stream() {
+        return toCollection().stream();
     }
 
     // Classes

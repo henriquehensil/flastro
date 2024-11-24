@@ -40,9 +40,9 @@ public final class ElementsImpl implements Elements {
         }
 
         for (@NotNull DataImpl data : dataList) {
-            @NotNull List<@NotNull Column<?>> columns = data.getValues().keySet()
+            @NotNull List<@NotNull Column<?>> columns = table.getColumns()
                     .stream()
-                    .filter(column -> !table.getColumns().toCollection().contains(column))
+                    .filter(column -> !data.getValues().containsKey(column))
                     .collect(Collectors.toList());
 
             columns.forEach(column -> data.getValues().put(column, column.getDefault()));
@@ -114,8 +114,12 @@ public final class ElementsImpl implements Elements {
     }
 
     @Override
-    public @Unmodifiable @NotNull Set<Data> toCollection() {
+    public @Unmodifiable @NotNull Set<@NotNull Data> toCollection() {
         return Collections.unmodifiableSet(new LinkedHashSet<>(rows.values()));
+    }
+
+    public int size() {
+        return toCollection().size();
     }
 
     // Classes

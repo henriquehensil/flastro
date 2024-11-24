@@ -5,6 +5,7 @@ import ghostface.dev.exception.NameAlreadyExists;
 import ghostface.dev.exception.key.DuplicatedKeyValueException;
 import ghostface.dev.exception.key.MissingKeyException;
 import ghostface.dev.exception.table.TableException;
+import ghostface.dev.exception.table.TableStateException;
 import ghostface.dev.impl.database.AuthenticationImpl;
 import ghostface.dev.impl.database.DatabaseImpl;
 import ghostface.dev.impl.table.KeyImpl;
@@ -108,14 +109,28 @@ public final class TableEntitiesTest {
         }
 
         elements.create();
+        Assertions.assertTrue(elements.get(1).isPresent());
 
         // if create key column when has elements
         try {
             columns.createKey("keyTest", DataType.BOOLEAN);
             Assertions.fail();
-        } catch (Throwable e) {
+        } catch (TableStateException e) {
             Assertions.assertTrue(true);
         }
+
+        Assertions.assertTrue(elements.toCollection().contains(elements.get(1).get()));
+        Assertions.assertTrue(elements.get(1).get().toCollection().contains("test value"));
+
+        // add new column
+        columns.create("simpleColumn", DataType.STRING, "hello", true);
+        columns.create("rsrsColumn", DataType.STRING, "rsrs", true);
+
+        Assertions.assertFalse(elements.get(1).get().toCollection().contains("hello"));
+        Assertions.assertFalse(elements.get(1).get().toCollection().contains("rsrs"));
+        elements.load(); // load the new columns
+        Assertions.assertTrue(elements.get(1).get().toCollection().contains("hello"));
+        Assertions.assertTrue(elements.get(1).get().toCollection().contains("rsrs"));
     }
 
     @Test

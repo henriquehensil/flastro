@@ -1,7 +1,6 @@
 package ghostface.dev.table.column;
 
 import ghostface.dev.DataType;
-import ghostface.dev.table.Key;
 import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

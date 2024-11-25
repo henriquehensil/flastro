@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface KeyContent<K, V> {
+public interface KeyContent<K, V> extends UnmodifiableContent<V> {
 
     @NotNull Optional<? extends V> get(@NotNull K id);
 
@@ -14,5 +14,6 @@ public interface KeyContent<K, V> {
 
     boolean delete(@NotNull K id);
 
+    @Override
     @Unmodifiable @NotNull Collection<? extends V> toCollection();
 }

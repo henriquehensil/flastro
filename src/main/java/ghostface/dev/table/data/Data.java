@@ -1,5 +1,6 @@
 package ghostface.dev.table.data;
 
+import ghostface.dev.content.UnmodifiableContent;
 import ghostface.dev.exception.column.ColumnException;
 import ghostface.dev.table.Table;
 import ghostface.dev.table.column.Column;
@@ -9,7 +10,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
 
-public interface Data {
+public interface Data extends UnmodifiableContent<@Nullable Object> {
 
     @NotNull Table getTable();
 
@@ -24,5 +25,6 @@ public interface Data {
      * */
     <E> void set(@NotNull Column<E> column, @Nullable E value) throws IllegalArgumentException, ColumnException;
 
-    @Unmodifiable @NotNull Collection<Object> toCollection();
+    @Override
+    @Unmodifiable @NotNull Collection<@Nullable Object> toCollection();
 }

@@ -1,12 +1,15 @@
 package ghostface.dev.nest;
 
 import ghostface.dev.DataType;
+import ghostface.dev.content.UnmodifiableContent;
 import ghostface.dev.exception.NameAlreadyExists;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Unmodifiable;
 
+import java.util.Collection;
 import java.util.Optional;
 
-public interface Nest<T> {
+public interface Nest<T> extends UnmodifiableContent<T> {
 
     /**
      * @throws NameAlreadyExists if the ID already in use
@@ -22,4 +25,7 @@ public interface Nest<T> {
     @NotNull Optional<T> getValue(@NotNull String key);
 
     @NotNull DataType<T> getDataType();
+
+    @Override
+    @Unmodifiable @NotNull Collection<? extends T> toCollection();
 }

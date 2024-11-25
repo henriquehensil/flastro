@@ -1,6 +1,7 @@
 package ghostface.dev.table.column;
 
 import ghostface.dev.DataType;
+import ghostface.dev.content.UnmodifiableContent;
 import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,7 +12,7 @@ import ghostface.dev.exception.table.TableStateException;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface Columns {
+public interface Columns extends UnmodifiableContent<@NotNull Column<?>> {
 
     /**
      * @throws NameAlreadyExists if name is already in use
@@ -30,5 +31,6 @@ public interface Columns {
 
     @NotNull Optional<? extends Column<?>> get(@NotNull String name);
 
-    @Unmodifiable @NotNull Collection<? extends Column<?>> toCollection();
+    @Override
+    @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> toCollection();
 }

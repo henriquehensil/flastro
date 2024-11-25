@@ -35,5 +35,5 @@ public interface FileStorage extends KeyContent<String, File> {
     boolean delete(@NotNull String id);
 
     @Override
-    @Unmodifiable @NotNull Collection<File> toCollection();
+    @Unmodifiable @NotNull Collection<? extends File> toCollection();
 }

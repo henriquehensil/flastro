@@ -1,7 +1,7 @@
 package ghostface.dev.impl;
 
 import ghostface.dev.DataType;
-import ghostface.dev.exception.NameAlreadyExists;
+import ghostface.dev.exception.NameAlreadyExistsException;
 import ghostface.dev.nest.Nest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -20,9 +20,9 @@ public class NestImpl<T> implements Nest<T> {
     }
 
     @Override
-    public @NotNull <E> Nest<E> createSub(@NotNull String id, @NotNull DataType<E> dataType) throws NameAlreadyExists {
+    public @NotNull <E> Nest<E> createSub(@NotNull String id, @NotNull DataType<E> dataType) throws NameAlreadyExistsException {
         if (subs.containsKey(id.toLowerCase())) {
-            throw new NameAlreadyExists("ID already in use");
+            throw new NameAlreadyExistsException("ID already in use");
         } else {
             @NotNull NestImpl<E> nest = new NestImpl<>(dataType);
             subs.put(id.toLowerCase(), nest);

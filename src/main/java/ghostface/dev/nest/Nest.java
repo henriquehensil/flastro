@@ -2,7 +2,7 @@ package ghostface.dev.nest;
 
 import ghostface.dev.DataType;
 import ghostface.dev.content.UnmodifiableContent;
-import ghostface.dev.exception.NameAlreadyExists;
+import ghostface.dev.exception.NameAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -12,9 +12,9 @@ import java.util.Optional;
 public interface Nest<T> extends UnmodifiableContent<T> {
 
     /**
-     * @throws NameAlreadyExists if the ID already in use
+     * @throws NameAlreadyExistsException if the ID already in use
      * */
-    <E> @NotNull Nest<E> createSub(@NotNull String id, @NotNull DataType<E> dataType) throws NameAlreadyExists;
+    <E> @NotNull Nest<E> createSub(@NotNull String id, @NotNull DataType<E> dataType) throws NameAlreadyExistsException;
 
     boolean put(@NotNull String key, T value);
 

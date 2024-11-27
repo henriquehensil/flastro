@@ -4,7 +4,7 @@ import ghostface.dev.exception.column.ColumnException;
 import ghostface.dev.exception.column.DuplicatedColumnException;
 import ghostface.dev.exception.key.DuplicatedKeyValueException;
 import ghostface.dev.exception.key.MissingKeyException;
-import ghostface.dev.exception.table.TableException;
+import ghostface.dev.exception.table.TableStateException;
 import ghostface.dev.table.Key;
 import ghostface.dev.table.column.Column;
 import ghostface.dev.table.data.Data;
@@ -50,9 +50,9 @@ public final class ElementsImpl implements Elements {
     }
 
     @Override
-    public @NotNull Data create(@NotNull Key<?> @NotNull ... keys) throws MissingKeyException, DuplicatedKeyValueException, DuplicatedColumnException, TableException {
+    public @NotNull Data create(@NotNull Key<?> @NotNull ... keys) throws MissingKeyException, DuplicatedKeyValueException, DuplicatedColumnException, TableStateException {
         if (getTable().getColumns().toCollection().isEmpty()) {
-            throw new TableException("It is not possible to create new data because there is no column");
+            throw new TableStateException("It is not possible to create new data because there is no column");
         }
 
         @NotNull Set<Column<?>> keyColumns = getTable().getColumns().getKeys();

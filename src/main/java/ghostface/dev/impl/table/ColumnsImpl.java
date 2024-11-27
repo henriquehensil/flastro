@@ -1,7 +1,7 @@
 package ghostface.dev.impl.table;
 
 import ghostface.dev.DataType;
-import ghostface.dev.exception.NameAlreadyExists;
+import ghostface.dev.exception.NameAlreadyExistsException;
 import ghostface.dev.exception.table.TableStateException;
 import ghostface.dev.table.column.Column;
 import ghostface.dev.table.column.Columns;
@@ -33,9 +33,9 @@ public final class ColumnsImpl implements Columns {
     }
 
     @Override
-    public @NotNull <E> Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws NameAlreadyExists {
-        if (get(name).isPresent()) {
-            throw new NameAlreadyExists("Column name already exists: " + name);
+    public @NotNull <E> Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws NameAlreadyExistsException {
+        if (contains(name)) {
+            throw new NameAlreadyExistsException("Column name already exists: " + name);
         } else synchronized (lock) {
             @NotNull ColumnImpl<E> column = new ColumnImpl<>(name, dataType, value, isNullable);
             columnSet.add(column);
@@ -44,9 +44,9 @@ public final class ColumnsImpl implements Columns {
     }
 
     @Override
-    public @NotNull <E> Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExists, TableStateException {
-        if (get(name).isPresent()) {
-            throw new NameAlreadyExists("Column name already exists: " + name);
+    public @NotNull <E> Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExistsException, TableStateException {
+        if (contains(name)) {
+            throw new NameAlreadyExistsException("Column name already exists: " + name);
         } else if (table.getElements().size() > 0) {
             throw new TableStateException("Cannot possible create new Key Columns now");
         } else synchronized (lock) {
@@ -62,8 +62,21 @@ public final class ColumnsImpl implements Columns {
     }
 
     @Override
-    public @NotNull Optional<Column<?>> get(@NotNull String name) {
-        return toCollection().stream().filter(column -> column.getName().equalsIgnoreCase(name)).findFirst();
+    @SuppressWarnings("unchecked")
+    public <E> @NotNull Optional<Column<E>> get(@NotNull String name, @NotNull DataType<E> dataType) {
+        @Nullable Column<?> column = stream().filter(col -> col.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
+
+        if (column != null) {
+            if (column.getDataType().getType().equals(dataType.getType())) {
+                return Optional.of((Column<E>) column);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    public boolean contains(@NotNull String columnName) {
+        return toCollection().stream().anyMatch(column -> column.getName().equalsIgnoreCase(columnName));
     }
 
     @Override

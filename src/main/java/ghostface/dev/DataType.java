@@ -4,29 +4,16 @@ import ghostface.dev.exception.DataTypeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 
 public interface DataType<T> {
 
     @NotNull DataType<String> STRING = new DataType<String>() {
         @Override
         public @NotNull String read(@NotNull InputStream stream) throws DataTypeException, IOException {
-            try (@NotNull InputStreamReader data = new InputStreamReader(stream, StandardCharsets.UTF_8)) {
-                @NotNull StringBuilder builder = new StringBuilder();
-                char @NotNull [] chars = new char[1024];
-
-                int read = data.read(chars);
-
-                while (read > 0) {
-                    builder.append(chars, 0, read);
-                    read = data.read(chars);
-                }
-
-                if (builder.toString().trim().isEmpty()) {
-                    throw new DataTypeException("Data is null");
-                }
-
-                return builder.toString();
+            try (@NotNull DataInputStream data = new DataInputStream(stream)) {
+                return data.readUTF();
+            } catch (EOFException | UTFDataFormatException e) {
+                throw new DataTypeException("No String found");
             }
         }
 

@@ -1,6 +1,6 @@
 
 import ghostface.dev.DataType;
-import ghostface.dev.exception.NameAlreadyExists;
+import ghostface.dev.exception.NameAlreadyExistsException;
 import ghostface.dev.impl.NestImpl;
 import ghostface.dev.nest.Nest;
 import org.jetbrains.annotations.NotNull;
@@ -38,8 +38,8 @@ public final class NestTest {
         try {
             nest.createSub("messages", DataType.INTEGER);
             Assertions.fail("Expected NameAlreadyExists to be thrown");
-        } catch (NameAlreadyExists e) {
-            Assertions.assertTrue(true);
+        } catch (NameAlreadyExistsException ignore) {
+            //
         }
 
         // Creating a sub-nest within a sub-nest
@@ -50,8 +50,8 @@ public final class NestTest {
         try {
             messagesNest.createSub("imgMsg", DataType.SHORT);
             Assertions.fail("Expected NameAlreadyExists to be thrown");
-        } catch (NameAlreadyExists e) {
-            Assertions.assertTrue(true);
+        } catch (NameAlreadyExistsException ignore) {
+            //
         }
     }
 }

@@ -1,10 +1,10 @@
 package table;
 
 import ghostface.dev.DataType;
-import ghostface.dev.exception.NameAlreadyExists;
+import ghostface.dev.exception.NameAlreadyExistsException;
+import ghostface.dev.exception.column.ColumnException;
 import ghostface.dev.exception.key.DuplicatedKeyValueException;
 import ghostface.dev.exception.key.MissingKeyException;
-import ghostface.dev.exception.table.TableException;
 import ghostface.dev.exception.table.TableStateException;
 import ghostface.dev.impl.database.AuthenticationImpl;
 import ghostface.dev.impl.database.DatabaseImpl;
@@ -38,7 +38,7 @@ public final class TableEntitiesTest {
 
         try {
             elements.create();
-        } catch (TableException e) {
+        } catch (TableStateException e) {
             Assertions.assertTrue(true);
         } catch (DuplicatedKeyValueException | MissingKeyException e) {
             Assertions.fail("That can't never happen");
@@ -50,7 +50,7 @@ public final class TableEntitiesTest {
     public void initialColumns() {
         @NotNull ColumnsImpl columns = table.getColumns();
 
-        Assertions.assertFalse(columns.get("test").isPresent());
+        Assertions.assertFalse(columns.contains("unknown"));
 
         Assertions.assertEquals(0, columns.size());
         Assertions.assertEquals(0, columns.getKeys().size());
@@ -68,7 +68,8 @@ public final class TableEntitiesTest {
 
         Assertions.assertEquals(1, columns.size());
         Assertions.assertTrue(columns.getKeys().isEmpty());
-        Assertions.assertTrue(columns.get("ageTest").isPresent());
+        Assertions.assertTrue(columns.contains("ageTest"));
+        Assertions.assertTrue(columns.get("ageTest", DataType.INTEGER).isPresent());
 
         try {
             elements.create();
@@ -81,7 +82,7 @@ public final class TableEntitiesTest {
 
         @NotNull Data data = elements.get(1).get();
 
-        Assertions.assertEquals(10, data.get(columns.get("ageTest").get()));
+        Assertions.assertEquals(10, data.get(columns.get("ageTest", DataType.INTEGER).get()));
     }
 
     @Test
@@ -94,8 +95,8 @@ public final class TableEntitiesTest {
         try {
             elements.create();
             Assertions.fail("Columns does not exists");
-        } catch (Throwable e) {
-            Assertions.assertTrue(true);
+        } catch (TableStateException ignore) {
+            //
         }
 
         columns.create("test", DataType.STRING, "test value",false);
@@ -104,33 +105,59 @@ public final class TableEntitiesTest {
         try {
             columns.create("test", DataType.INTEGER, 1, true);
             Assertions.fail("Name already exists");
-        } catch (NameAlreadyExists e) {
-            Assertions.assertTrue(true);
+        } catch (NameAlreadyExistsException ignore) {
+            //
         }
 
+        // if create key column when has elements
         elements.create();
         Assertions.assertTrue(elements.get(1).isPresent());
-
-        // if create key column when has elements
         try {
             columns.createKey("keyTest", DataType.BOOLEAN);
             Assertions.fail();
-        } catch (TableStateException e) {
-            Assertions.assertTrue(true);
+        } catch (TableStateException ignore) {
+            //
         }
 
         Assertions.assertTrue(elements.toCollection().contains(elements.get(1).get()));
         Assertions.assertTrue(elements.get(1).get().toCollection().contains("test value"));
 
-        // add new column
-        columns.create("simpleColumn", DataType.STRING, "hello", true);
-        columns.create("rsrsColumn", DataType.STRING, "rsrs", true);
+        // added new column and load them
+        columns.create("helloColumn", DataType.STRING, "hello", false);
+        columns.create("worldColumn", DataType.STRING, "world", true);
+        Assertions.assertTrue(columns.get("helloColumn", DataType.STRING).isPresent());
+        Assertions.assertTrue(columns.get("worldColumn", DataType.STRING).isPresent());
 
         Assertions.assertFalse(elements.get(1).get().toCollection().contains("hello"));
-        Assertions.assertFalse(elements.get(1).get().toCollection().contains("rsrs"));
+        Assertions.assertFalse(elements.get(1).get().toCollection().contains("world"));
         elements.load(); // load the new columns
         Assertions.assertTrue(elements.get(1).get().toCollection().contains("hello"));
-        Assertions.assertTrue(elements.get(1).get().toCollection().contains("rsrs"));
+        Assertions.assertTrue(elements.get(1).get().toCollection().contains("world"));
+
+        /*
+        * invalids operations:
+        * Set an value
+        * */
+        try {
+            elements.get(1).get().set(columns.get("helloColumn", DataType.STRING).get(), null);
+            Assertions.fail("Column is not nullable");
+        } catch (ColumnException ignore) {
+            //
+        }
+
+        // Todo: set by an no-existent column
+
+        // Set value
+
+        @NotNull Column<String> column = columns.get("helloColumn", DataType.STRING).get();
+
+        elements.get(1).get().set(column, "java");
+
+        Assertions.assertNotEquals("hello", elements.get(1).get().get(column));
+        Assertions.assertFalse(elements.get(1).get().toCollection().contains("hello"));
+
+        Assertions.assertEquals("java", elements.get(1).get().get(column));
+        Assertions.assertTrue(elements.get(1).get().toCollection().contains("java"));
     }
 
     @Test
@@ -140,19 +167,24 @@ public final class TableEntitiesTest {
         @NotNull Column<String> emailColumn = table.getColumns().createKey("email", DataType.STRING);
         table.getColumns().create("test", DataType.STRING, "000", false);
 
-        Assertions.assertTrue(table.getColumns().get("UUID").isPresent());
-        Assertions.assertTrue(table.getColumns().get("email").isPresent());
-        Assertions.assertTrue(table.getColumns().get("test").isPresent());
+        Assertions.assertTrue(table.getColumns().get("UUID", DataType.STRING).isPresent());
+        Assertions.assertTrue(table.getColumns().get("email", DataType.STRING).isPresent());
+        Assertions.assertTrue(table.getColumns().get("test", DataType.STRING).isPresent());
 
-        Assertions.assertTrue(table.getColumns().get("UUID").get().isKey());
-        Assertions.assertTrue(table.getColumns().get("email").get().isKey());
-        Assertions.assertFalse(table.getColumns().get("test").get().isKey());
+        Assertions.assertTrue(table.getColumns().get("UUID", DataType.STRING).get().isKey());
+        Assertions.assertTrue(table.getColumns().get("email", DataType.STRING).get().isKey());
+        Assertions.assertFalse(table.getColumns().get("test", DataType.STRING).get().isKey());
 
+        Assertions.assertTrue(table.getColumns().contains("UUID"));
+        Assertions.assertTrue(table.getColumns().contains("email"));
+        Assertions.assertTrue(table.getColumns().contains("test"));
+
+        // created elements without key
         try {
             table.getElements().create();
             Assertions.fail("Has key");
-        } catch (MissingKeyException e) {
-            Assertions.assertTrue(true);
+        } catch (MissingKeyException ignore) {
+            //
         }
 
         // Create keys
@@ -166,8 +198,8 @@ public final class TableEntitiesTest {
         try {
             table.getElements().create(emailKey, uuidKey);
             Assertions.fail();
-        } catch (DuplicatedKeyValueException e) {
-            Assertions.assertTrue(true);
+        } catch (DuplicatedKeyValueException ignore) {
+            //
         }
 
         Assertions.assertTrue(table.getElements().get(1).isPresent());

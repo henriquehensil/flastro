@@ -1,7 +1,9 @@
 package ghostface.dev.storage;
 
-import ghostface.dev.content.KeyContent;
+import ghostface.dev.DataType;
+import ghostface.dev.content.NamedContent;
 import ghostface.dev.database.Database;
+import ghostface.dev.exception.NameAlreadyExistsException;
 import ghostface.dev.nest.Nest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
@@ -9,21 +11,23 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface NestStorage extends KeyContent<String, Nest<?>> {
+public interface NestStorage extends NamedContent<Nest<?>> {
 
     @NotNull Database database();
+
+    /**
+     * @throws NameAlreadyExistsException if {@code name} is already in use
+     * */
+    <E> @NotNull Nest<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExistsException;
 
     // Implementations
 
     @Override
-    @NotNull Optional<? extends Nest<?>> get(@NotNull String id);
+    @NotNull Optional<? extends @NotNull Nest<?>> get(@NotNull String name);
 
     @Override
-    boolean put(@NotNull String id, @NotNull Nest<?> nest);
+    boolean delete(@NotNull String name);
 
     @Override
-    boolean delete(@NotNull String id);
-
-    @Override
-    @Unmodifiable @NotNull Collection<? extends Nest<?>> toCollection();
+    @Unmodifiable @NotNull Collection<? extends @NotNull Nest<?>> toCollection();
 }

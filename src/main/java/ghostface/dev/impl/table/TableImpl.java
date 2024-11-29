@@ -1,6 +1,7 @@
 package ghostface.dev.impl.table;
 
-import ghostface.dev.impl.database.DatabaseImpl;
+import ghostface.dev.impl.TableStorageImpl;
+import ghostface.dev.storage.TableStorage;
 import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -9,19 +10,19 @@ import java.util.Objects;
 
 public final class TableImpl implements Table {
 
-    private final @NotNull DatabaseImpl database;
+    private final @NotNull TableStorageImpl storage;
     private final @NotNull ElementsImpl datas;
     private final @NotNull ColumnsImpl columns;
 
-    public TableImpl(@NotNull DatabaseImpl database) {
-        this.database = database;
+    public TableImpl(@NotNull TableStorageImpl storage) {
+        this.storage = storage;
         this.datas = new ElementsImpl(this);
         this.columns = new ColumnsImpl(this);
     }
 
     @Override
-    public @NotNull DatabaseImpl getDatabase() {
-        return database;
+    public @NotNull TableStorage getTableStorage() {
+        return storage;
     }
 
     @Override

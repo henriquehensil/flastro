@@ -2,7 +2,6 @@ package ghostface.dev.table.data;
 
 import ghostface.dev.content.UnmodifiableContent;
 import ghostface.dev.exception.column.ColumnException;
-import ghostface.dev.table.Table;
 import ghostface.dev.table.column.Column;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,7 +11,7 @@ import java.util.Collection;
 
 public interface Data extends UnmodifiableContent<@Nullable Object> {
 
-    @NotNull Table getTable();
+    @NotNull Elements getElements();
 
     /**
      * @throws IllegalArgumentException if the column does not exist

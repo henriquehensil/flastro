@@ -1,7 +1,6 @@
 package ghostface.dev.table.column;
 
 import ghostface.dev.DataType;
-import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.UnknownNullability;
 
@@ -11,7 +10,7 @@ public interface Column<T> {
 
     boolean isKey();
 
-    @NotNull Table getTable();
+    @NotNull Columns getColumns();
 
     @NotNull String getName();
 

@@ -129,14 +129,14 @@ public final class ElementsImpl implements Elements {
         private final @NotNull Map<@NotNull Column<?>, @Nullable Object> values = new HashMap<>();
 
         @Override
-        public @NotNull TableImpl getTable() {
-            return ElementsImpl.this.table;
+        public @NotNull ElementsImpl getElements() {
+            return ElementsImpl.this;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public <E> @Nullable E get(@NotNull Column<E> column) throws IllegalArgumentException {
-            getTable().getElements().load();
+            getElements().load();
 
             if (!values.containsKey(column)) {
                 throw new IllegalArgumentException("This column does not exist: " + column);
@@ -147,7 +147,7 @@ public final class ElementsImpl implements Elements {
 
         @Override
         public <E> void set(@NotNull Column<E> column, @Nullable E value) throws IllegalArgumentException, ColumnException {
-            getTable().getElements().load();
+            getElements().load();
 
             if (!values.containsKey(column)) {
                 throw new IllegalArgumentException("This column does not exist: " + column);
@@ -177,6 +177,19 @@ public final class ElementsImpl implements Elements {
                     return Objects.equals(obj, value);
                 }
             });
+        }
+
+        @Override
+        public boolean equals(@Nullable Object object) {
+            if (this == object) return true;
+            if (object == null || getClass() != object.getClass()) return false;
+            @NotNull DataImpl data = (DataImpl) object;
+            return Objects.equals(values, data.values);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(values);
         }
     }
 }

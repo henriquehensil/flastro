@@ -140,8 +140,8 @@ public final class ColumnsImpl implements Columns {
         }
 
         @Override
-        public @NotNull TableImpl getTable() {
-            return ColumnsImpl.this.table;
+        public @NotNull Columns getColumns() {
+            return ColumnsImpl.this;
         }
 
         @Override
@@ -171,16 +171,17 @@ public final class ColumnsImpl implements Columns {
             if (this == object) return true;
             if (object == null || getClass() != object.getClass()) return false;
             @NotNull ColumnImpl<?> column = (ColumnImpl<?>) object;
-            return isNullable == column.isNullable &&
-                    isKey == column.isKey &&
-                    Objects.equals(name, column.name) &&
-                    Objects.equals(table, column.getTable()) &&
-                    Objects.equals(dataType, column.dataType);
+            return
+                    this.isNullable == column.isNullable &&
+                    this.isKey == column.isKey &&
+                    Objects.equals(this.name.toLowerCase(), column.name.toLowerCase()) &&
+                    Objects.equals(this.getColumns(), column.getColumns()) &&
+                    Objects.equals(this.dataType, column.dataType);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name, table, dataType, isNullable, isKey);
+            return Objects.hash(name, getColumns(), dataType, isNullable, isKey);
         }
     }
 }

@@ -3,7 +3,6 @@ package ghostface.dev.table.data;
 import ghostface.dev.content.UnmodifiableContent;
 import ghostface.dev.exception.key.DuplicatedKeyValueException;
 import ghostface.dev.exception.key.MissingKeyException;
-import ghostface.dev.exception.table.TableException;
 import ghostface.dev.exception.table.TableStateException;
 import ghostface.dev.table.Key;
 import ghostface.dev.table.Table;

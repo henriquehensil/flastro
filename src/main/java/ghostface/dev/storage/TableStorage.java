@@ -10,24 +10,32 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Collection;
 import java.util.Optional;
 
-
-public interface TableStorage extends NamedContent<@NotNull Table> {
+public interface TableStorage {
 
     @NotNull Database database();
 
-    /**
-     * @throws NameAlreadyExistsException if {@code name} is already in use
-     * */
-    @NotNull Table create(@NotNull String name) throws NameAlreadyExistsException;
+    @NotNull Tables getTables();
 
-    // Implementations
+    // Classes
 
-    @Override
-    @NotNull Optional<? extends @NotNull Table> get(@NotNull String id);
+    interface Tables extends NamedContent<@NotNull Table> {
 
-    @Override
-    boolean delete(@NotNull String name);
+        @NotNull TableStorage getTableStorage();
 
-    @Override
-    @Unmodifiable @NotNull Collection<? extends @NotNull Table> toCollection();
+        /**
+         * @throws NameAlreadyExistsException if {@code name} is already in use
+         * */
+        @NotNull Table create(@NotNull String name) throws NameAlreadyExistsException;
+
+        // Implementations
+
+        @Override
+        @NotNull Optional<? extends @NotNull Table> get(@NotNull String id);
+
+        @Override
+        boolean delete(@NotNull String name);
+
+        @Override
+        @Unmodifiable @NotNull Collection<? extends @NotNull Table> toCollection();
+    }
 }

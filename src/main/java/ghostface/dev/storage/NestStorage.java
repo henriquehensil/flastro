@@ -11,23 +11,32 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface NestStorage extends NamedContent<Nest<?>> {
+public interface NestStorage {
 
     @NotNull Database database();
 
-    /**
-     * @throws NameAlreadyExistsException if {@code name} is already in use
-     * */
-    <E> @NotNull Nest<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExistsException;
+    @NotNull Nests getNests();
 
-    // Implementations
+    // Classes
 
-    @Override
-    @NotNull Optional<? extends @NotNull Nest<?>> get(@NotNull String name);
+    interface Nests extends NamedContent<@NotNull Nest<?>>  {
 
-    @Override
-    boolean delete(@NotNull String name);
+        @NotNull NestStorage getNestStorage();
 
-    @Override
-    @Unmodifiable @NotNull Collection<? extends @NotNull Nest<?>> toCollection();
+        /**
+         * @throws NameAlreadyExistsException if {@code name} is already in use
+         * */
+        <E> @NotNull Nest<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExistsException;
+
+        // Implementations
+
+        @Override
+        @NotNull Optional<? extends @NotNull Nest<?>> get(@NotNull String name);
+
+        @Override
+        boolean delete(@NotNull String name);
+
+        @Override
+        @Unmodifiable @NotNull Collection<? extends @NotNull Nest<?>> toCollection();
+    }
 }

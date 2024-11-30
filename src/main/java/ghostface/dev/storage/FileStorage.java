@@ -12,34 +12,45 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface FileStorage extends NamedContent<@NotNull File> {
+public interface FileStorage {
 
     @NotNull Database database();
 
     @NotNull Path getDefault();
 
-    @NotNull Optional<@NotNull File> get(@NotNull Path path);
+    @NotNull Files getFiles();
 
-    /**
-     * @throws NameAlreadyExistsException if {@code name} is already in use
-     * @throws IOException if an I/O error occurs
-     * */
-    @NotNull File create(@NotNull String name) throws NameAlreadyExistsException, IOException;
+    // Classes
 
-    /**
-     * @throws NameAlreadyExistsException if {@code folder} and {@code name} is already in use
-     * @throws IOException if an I/O error occurs
-     * */
-    @NotNull File create(@NotNull String folder, @NotNull String name) throws NameAlreadyExistsException, IOException;
+    interface Files extends NamedContent<@NotNull File> {
 
-    // Implementations
+        @NotNull FileStorage getFileStorage();
 
-    @Override
-    @NotNull Optional<@NotNull File> get(@NotNull String name);
+        /**
+         * @throws NameAlreadyExistsException if {@code name} is already in use
+         * @throws IOException if an I/O error occurs
+         * */
+        @NotNull File create(@NotNull String name) throws NameAlreadyExistsException, IOException;
 
-    @Override
-    boolean delete(@NotNull String name);
+        /**
+         * @throws NameAlreadyExistsException if {@code folder} and {@code name} is already in use
+         * @throws IOException if an I/O error occurs
+         * */
+        @NotNull File create(@NotNull String folder, @NotNull String name) throws NameAlreadyExistsException, IOException;
 
-    @Override
-    @Unmodifiable @NotNull Collection<@NotNull File> toCollection();
+        @NotNull Optional<@NotNull File> get(@NotNull Path path);
+
+        boolean delete(@NotNull Path path);
+
+        // Implementations
+
+        @Override
+        @NotNull Optional<@NotNull File> get(@NotNull String name);
+
+        @Override
+        boolean delete(@NotNull String name);
+
+        @Override
+        @Unmodifiable @NotNull Collection<@NotNull File> toCollection();
+    }
 }

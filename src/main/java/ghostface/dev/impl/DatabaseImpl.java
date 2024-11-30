@@ -1,10 +1,7 @@
-package ghostface.dev.impl.database;
+package ghostface.dev.impl;
 
 import ghostface.dev.database.Authentication;
 import ghostface.dev.database.Database;
-import ghostface.dev.impl.storage.FileStorageImpl;
-import ghostface.dev.impl.storage.NestStorageImpl;
-import ghostface.dev.impl.storage.TableStorageImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.file.Paths;
@@ -19,8 +16,8 @@ public final class DatabaseImpl implements Database {
     public DatabaseImpl(@NotNull Authentication authentication) {
         this.authentication = authentication;
         this.fileStorage = new FileStorageImpl(this, Paths.get(System.getProperty("user.dir"), "root"));
-        this.nestStorage = new NestStorageImpl(this);
         this.tableStorage = new TableStorageImpl(this);
+        this.nestStorage = new NestStorageImpl(this);
     }
 
     @Override

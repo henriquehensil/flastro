@@ -1,9 +1,8 @@
-package ghostface.dev.storage;
+package ghostface.dev.table;
 
 import ghostface.dev.content.NamedContent;
 import ghostface.dev.database.Database;
-import ghostface.dev.exception.NameAlreadyExistsException;
-import ghostface.dev.table.Table;
+import ghostface.dev.exception.table.TableAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -20,12 +19,12 @@ public interface TableStorage {
 
     interface Tables extends NamedContent<@NotNull Table> {
 
-        @NotNull TableStorage getTableStorage();
+        @NotNull TableStorage getStorage();
 
         /**
-         * @throws NameAlreadyExistsException if {@code name} is already in use
+         * @throws TableAlreadyExistsException if {@code name} is already in use
          * */
-        @NotNull Table create(@NotNull String name) throws NameAlreadyExistsException;
+        @NotNull Table create(@NotNull String name) throws TableAlreadyExistsException;
 
         // Implementations
 
@@ -36,6 +35,6 @@ public interface TableStorage {
         boolean delete(@NotNull String name);
 
         @Override
-        @Unmodifiable @NotNull Collection<? extends @NotNull Table> toCollection();
+        @Unmodifiable @NotNull Collection<@NotNull Table> toCollection();
     }
 }

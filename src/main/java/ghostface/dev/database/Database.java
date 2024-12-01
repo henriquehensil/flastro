@@ -1,8 +1,8 @@
 package ghostface.dev.database;
 
-import ghostface.dev.storage.FileStorage;
-import ghostface.dev.storage.NestStorage;
-import ghostface.dev.storage.TableStorage;
+import ghostface.dev.file.FileStorage;
+import ghostface.dev.nest.NestStorage;
+import ghostface.dev.table.TableStorage;
 import org.jetbrains.annotations.NotNull;
 
 public interface Database {

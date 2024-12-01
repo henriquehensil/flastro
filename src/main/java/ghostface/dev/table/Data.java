@@ -2,10 +2,11 @@ package ghostface.dev.table;
 
 import ghostface.dev.table.column.Column;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-public interface Key<T> {
+public interface Data<T> {
 
     @NotNull Column<T> getColumn();
 
-    @NotNull T getValue();
+    @Nullable T getValue();
 }

@@ -1,4 +1,4 @@
-package ghostface.dev.storage;
+package ghostface.dev.file;
 
 import ghostface.dev.content.NamedContent;
 import ghostface.dev.database.Database;
@@ -51,6 +51,7 @@ public interface FileStorage {
         boolean delete(@NotNull String name);
 
         @Override
-        @Unmodifiable @NotNull Collection<@NotNull File> toCollection();
+        @Unmodifiable
+        @NotNull Collection<@NotNull File> toCollection();
     }
 }

@@ -1,10 +1,9 @@
-package ghostface.dev.storage;
+package ghostface.dev.nest;
 
 import ghostface.dev.DataType;
 import ghostface.dev.content.NamedContent;
 import ghostface.dev.database.Database;
 import ghostface.dev.exception.NameAlreadyExistsException;
-import ghostface.dev.nest.Nest;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -37,6 +36,7 @@ public interface NestStorage {
         boolean delete(@NotNull String name);
 
         @Override
-        @Unmodifiable @NotNull Collection<? extends @NotNull Nest<?>> toCollection();
+        @Unmodifiable
+        @NotNull Collection<@NotNull Nest<?>> toCollection();
     }
 }

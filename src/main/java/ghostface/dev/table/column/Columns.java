@@ -29,8 +29,8 @@ public interface Columns extends UnmodifiableContent<@NotNull Column<?>> {
 
     @NotNull Table getTable();
 
-    <E> @NotNull Optional<? extends Column<E>> get(@NotNull String name, @NotNull DataType<E> dataType);
+    @NotNull Optional<? extends Column<?>> get(@NotNull String name);
 
     @Override
-    @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> toCollection();
+    @Unmodifiable @NotNull Collection<@NotNull Column<?>> toCollection();
 }

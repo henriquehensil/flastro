@@ -3,7 +3,6 @@ package ghostface.dev.nest;
 import ghostface.dev.DataType;
 import ghostface.dev.content.UnmodifiableContent;
 import ghostface.dev.exception.NameAlreadyExistsException;
-import ghostface.dev.storage.NestStorage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -28,5 +27,5 @@ public interface Nest<T> extends UnmodifiableContent<T> {
     @NotNull DataType<T> getDataType();
 
     @Override
-    @Unmodifiable @NotNull Collection<? extends T> toCollection();
+    @Unmodifiable @NotNull Collection<T> toCollection();
 }

@@ -6,13 +6,13 @@ import org.jetbrains.annotations.UnknownNullability;
 
 public interface Column<T> {
 
+    @NotNull String getId();
+
+    @NotNull String getName();
+
     boolean isNullable();
 
     boolean isKey();
-
-    @NotNull Columns getColumns();
-
-    @NotNull String getName();
 
     void setName(@NotNull String name);
 

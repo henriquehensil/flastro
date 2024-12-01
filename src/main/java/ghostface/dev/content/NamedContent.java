@@ -13,5 +13,5 @@ public interface NamedContent<V> extends UnmodifiableContent<V> {
     boolean delete(@NotNull String name);
 
     @Override
-    @Unmodifiable @NotNull Collection<? extends V> toCollection();
+    @Unmodifiable @NotNull Collection<V> toCollection();
 }

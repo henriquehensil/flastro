@@ -4,8 +4,14 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
+import java.util.Iterator;
 
-public interface UnmodifiableContent<T> {
+public interface UnmodifiableContent<T> extends Iterable<T> {
 
-    @Unmodifiable @NotNull Collection<? extends T> toCollection();
+    @Override
+    default @NotNull Iterator<T> iterator() {
+        return toCollection().iterator();
+    }
+
+    @Unmodifiable @NotNull Collection<T> toCollection();
 }

@@ -31,7 +31,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Byte read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readByte();
+                return (Byte) data.readByte();
             }
         }
 
@@ -52,7 +52,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Short read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readShort();
+                return (Short) data.readShort();
             }
         }
 
@@ -73,7 +73,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Integer read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readInt();
+                return (Integer) data.readInt();
             }
         }
 
@@ -94,7 +94,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Long read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readLong();
+                return (Long) data.readLong();
             }
         }
 
@@ -115,7 +115,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Float read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readFloat();
+                return (Float) data.readFloat();
             }
         }
 
@@ -136,7 +136,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Double read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readDouble();
+                return (Double) data.readDouble();
             }
         }
 
@@ -157,7 +157,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Boolean read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readBoolean();
+                return (Boolean) data.readBoolean();
             }
         }
 
@@ -178,7 +178,7 @@ public interface DataType<T> {
         @Override
         public @NotNull Character read(@NotNull InputStream stream) throws IOException {
             try (@NotNull DataInputStream data = new DataInputStream(stream)) {
-                return data.readChar();
+                return (Character) data.readChar();
             }
         }
 

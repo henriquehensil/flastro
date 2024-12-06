@@ -9,9 +9,11 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface Nest<T> extends UnmodifiableContent<T> {
+public interface Nest<T> {
 
     @NotNull NestStorage getStorage();
+
+    @NotNull Children getSubs();
 
     @NotNull Optional<T> getValue(@NotNull String key);
 
@@ -19,8 +21,7 @@ public interface Nest<T> extends UnmodifiableContent<T> {
 
     @NotNull DataType<T> getDataType();
 
-    @Override
-    @Unmodifiable @NotNull Collection<T> toCollection();
+    @Unmodifiable @NotNull Collection<T> getValues();
 
     // Classes
 

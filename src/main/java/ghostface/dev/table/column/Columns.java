@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public interface Columns extends UnmodifiableContent<@NotNull Column<?>> {
 
+    @NotNull Table getTable();
+
     /**
      * @throws NameAlreadyExistsException if name is already in use
      * */
@@ -25,11 +27,9 @@ public interface Columns extends UnmodifiableContent<@NotNull Column<?>> {
      * */
     <E> @NotNull Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExistsException, TableStateException;
 
-    // Getters
+    @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String name);
 
-    @NotNull Table getTable();
-
-    @NotNull Optional<? extends Column<?>> get(@NotNull String name);
+    boolean remove(@NotNull String columnId);
 
     @Override
     @Unmodifiable @NotNull Collection<@NotNull Column<?>> toCollection();

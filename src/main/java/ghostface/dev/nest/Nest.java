@@ -34,6 +34,8 @@ public interface Nest<T> {
 
         @NotNull Optional<? extends @NotNull Nest<?>> getSub(@NotNull String id);
 
+        boolean delete(@NotNull String id);
+
         @Override
         @Unmodifiable @NotNull Collection<@NotNull Nest<?>> toCollection();
 

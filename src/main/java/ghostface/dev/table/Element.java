@@ -1,10 +1,8 @@
-package ghostface.dev.table.data;
+package ghostface.dev.table;
 
 import ghostface.dev.content.UnmodifiableContent;
 import ghostface.dev.exception.column.ColumnException;
 import ghostface.dev.exception.column.InvalidColumnException;
-import ghostface.dev.table.TableData;
-import ghostface.dev.table.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

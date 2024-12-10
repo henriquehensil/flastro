@@ -1,4 +1,4 @@
-package ghostface.dev.table.column;
+package ghostface.dev.table;
 
 import ghostface.dev.DataType;
 import org.jetbrains.annotations.NotNull;

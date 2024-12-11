@@ -6,7 +6,6 @@ import ghostface.dev.exception.NameAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -22,7 +21,7 @@ public interface FileStorage {
 
     // Classes
 
-    interface Files extends NamedContent<@NotNull File> {
+    interface Files extends NamedContent<@NotNull MetaFile> {
 
         @NotNull FileStorage getFileStorage();
 
@@ -30,28 +29,27 @@ public interface FileStorage {
          * @throws NameAlreadyExistsException if {@code name} is already in use
          * @throws IOException if an I/O error occurs
          * */
-        @NotNull File create(@NotNull String name) throws NameAlreadyExistsException, IOException;
+        @NotNull MetaFile create(@NotNull String name) throws NameAlreadyExistsException, IOException;
 
         /**
          * @throws NameAlreadyExistsException if {@code folder} and {@code name} is already in use
          * @throws IOException if an I/O error occurs
          * */
-        @NotNull File create(@NotNull String folder, @NotNull String name) throws NameAlreadyExistsException, IOException;
+        @NotNull MetaFile create(@NotNull String folder, @NotNull String name) throws NameAlreadyExistsException, IOException;
 
-        @NotNull Optional<@NotNull File> get(@NotNull Path path);
+        @NotNull Optional<@NotNull MetaFile> get(@NotNull Path path);
 
         boolean delete(@NotNull Path path);
 
         // Implementations
 
         @Override
-        @NotNull Optional<@NotNull File> get(@NotNull String name);
+        @NotNull Optional<@NotNull MetaFile> get(@NotNull String name);
 
         @Override
         boolean delete(@NotNull String name);
 
         @Override
-        @Unmodifiable
-        @NotNull Collection<@NotNull File> toCollection();
+        @Unmodifiable @NotNull Collection<@NotNull MetaFile> toCollection();
     }
 }

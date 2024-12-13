@@ -17,9 +17,11 @@ public interface MetaFile {
 
     @NotNull FileTimes getTimes();
 
-    @NotNull Path getPath();
+    @NotNull FilePermissions getPermissions();
 
-    @NotNull String getUser();
+    @NotNull FileOwners getOwners();
+
+    @NotNull Path getPath();
 
     // Classes
 
@@ -27,7 +29,7 @@ public interface MetaFile {
 
         @NotNull System getSystem();
 
-        @Nullable String getString();
+        @Nullable String getKey();
 
         enum System {
             UNIX,
@@ -56,6 +58,24 @@ public interface MetaFile {
         @NotNull FileTime getModified();
 
         @NotNull FileTime getAccess();
+
+    }
+
+    interface FilePermissions {
+
+        boolean isReadable(@NotNull FileOwner owner);
+
+        boolean isWritable(@NotNull FileOwner owner);
+
+        boolean isExecutable(@NotNull FileOwner owner);
+
+    }
+
+    interface FileOwners {
+
+        @NotNull FileUserOwner getUser();
+
+        @NotNull FileGroupOwner getGroup();
 
     }
 }

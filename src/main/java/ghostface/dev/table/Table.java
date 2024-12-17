@@ -32,11 +32,11 @@ public interface Table {
          * @throws DuplicatedKeyValueException If the key value already exists
          * @throws TableStateException If table#getColumns is empty
          * */
-        @NotNull Element create(@NotNull TableData<?> @NotNull ... datas) throws MissingKeyException, DuplicatedKeyValueException, TableStateException;
+        @NotNull Element create(@NotNull TableData<?> @NotNull ... data) throws MissingKeyException, DuplicatedKeyValueException, TableStateException;
 
         boolean remove(int index);
 
-        @NotNull Optional<? extends Element> get(int index);
+        @NotNull Optional<? extends @NotNull Element> get(int index);
 
         @Override
         @Unmodifiable @NotNull Collection<@NotNull Element> toCollection();

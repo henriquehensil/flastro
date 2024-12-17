@@ -1,4 +1,4 @@
-import ghostface.dev.DataType;
+import codes.shawlas.DataType;
 import ghostface.dev.exception.DataTypeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;

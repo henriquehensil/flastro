@@ -2,7 +2,7 @@ package ghostface.dev.file;
 
 import ghostface.dev.content.NamedContent;
 import ghostface.dev.database.Database;
-import ghostface.dev.exception.NameAlreadyExistsException;
+import ghostface.dev.exception.file.FileAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -26,16 +26,16 @@ public interface FileStorage {
         @NotNull FileStorage getFileStorage();
 
         /**
-         * @throws NameAlreadyExistsException if {@code name} is already in use
+         * @throws FileAlreadyExistsException if {@code name} is already in use
          * @throws IOException if an I/O error occurs
          * */
-        @NotNull MetaFile create(@NotNull String name) throws NameAlreadyExistsException, IOException;
+        @NotNull MetaFile create(@NotNull String name) throws FileAlreadyExistsException, IOException;
 
         /**
-         * @throws NameAlreadyExistsException if {@code folder} and {@code name} is already in use
+         * @throws FileAlreadyExistsException if {@code folder} and {@code name} is already in use
          * @throws IOException if an I/O error occurs
          * */
-        @NotNull MetaFile create(@NotNull String folder, @NotNull String name) throws NameAlreadyExistsException, IOException;
+        @NotNull MetaFile create(@NotNull String folder, @NotNull String name) throws FileAlreadyExistsException, IOException;
 
         @NotNull Optional<@NotNull MetaFile> get(@NotNull Path path);
 

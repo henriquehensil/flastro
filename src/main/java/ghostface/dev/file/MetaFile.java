@@ -25,11 +25,14 @@ public interface MetaFile {
 
     // Classes
 
-    interface FileKey extends CharSequence {
+    interface FileKey {
 
         @NotNull System getSystem();
 
         @Nullable String getKey();
+
+        @Override
+        @NotNull String toString();
 
         enum System {
             UNIX,
@@ -44,8 +47,6 @@ public interface MetaFile {
         @NotNull InputStream getInputStream() throws IOException;
 
         void write(@NotNull OutputStream outputStream) throws IOException;
-
-        byte @NotNull [] getBytes();
 
         long size();
 
@@ -69,6 +70,7 @@ public interface MetaFile {
 
         boolean isExecutable(@NotNull FileOwner owner);
 
+        // Todo: setPermissions
     }
 
     interface FileOwners {

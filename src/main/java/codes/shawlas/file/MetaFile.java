@@ -11,7 +11,10 @@ import java.nio.file.attribute.FileTime;
 
 public interface MetaFile {
 
-    @NotNull FileKey getKey();
+    /**
+     * @return The Key represented in String or {@code null} if key is not founded
+     * */
+    @Nullable String getKey();
 
     @NotNull FileData getData();
 
@@ -19,33 +22,20 @@ public interface MetaFile {
 
     @NotNull FilePermissions getPermissions();
 
-    @NotNull FileOwners getOwners();
-
     @NotNull Path getPath();
 
     // Classes
 
-    interface FileKey {
-
-        @NotNull System getSystem();
-
-        @Nullable String getKey();
-
-        @Override
-        @NotNull String toString();
-
-        enum System {
-            UNIX,
-            WINDOWS,
-            OTHERS,
-            UNSUPPORTED;
-        }
-    }
-
     interface FileData {
 
+        /**
+         * @throws IOException if an I/O error occurs when getting InputStream from the file
+         * */
         @NotNull InputStream getInputStream() throws IOException;
 
+        /**
+         * @throws IOException if an I/O error occurs while written or if {@code getInputStream} error occurs
+         * */
         void write(@NotNull OutputStream outputStream) throws IOException;
 
         long size();
@@ -64,20 +54,11 @@ public interface MetaFile {
 
     interface FilePermissions {
 
-        boolean isReadable(@NotNull FileOwner owner);
+        boolean isFullyReadable();
 
-        boolean isWritable(@NotNull FileOwner owner);
+        boolean isFullyWritable();
 
-        boolean isExecutable(@NotNull FileOwner owner);
-
-        // Todo: setPermissions
-    }
-
-    interface FileOwners {
-
-        @NotNull FileUserOwner getUser();
-
-        @NotNull FileGroupOwner getGroup();
+        boolean isFullyExecutable();
 
     }
 }

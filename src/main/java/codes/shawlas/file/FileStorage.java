@@ -6,6 +6,7 @@ import codes.shawlas.exception.file.FileAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -23,8 +24,6 @@ public interface FileStorage {
 
     interface Files extends NamedContent<@NotNull MetaFile> {
 
-        @NotNull FileStorage getFileStorage();
-
         /**
          * @throws FileAlreadyExistsException if {@code name} is already in use
          * @throws IOException if an I/O error occurs
@@ -36,6 +35,12 @@ public interface FileStorage {
          * @throws IOException if an I/O error occurs
          * */
         @NotNull MetaFile create(@NotNull String folder, @NotNull String name) throws FileAlreadyExistsException, IOException;
+
+        /**
+         * @throws FileAlreadyExistsException if {@code File} is already stored
+         * @throws IOException if an I/O error occurs
+         * */
+        @NotNull MetaFile create(@NotNull File file) throws FileAlreadyExistsException, IOException;
 
         @NotNull Optional<@NotNull MetaFile> get(@NotNull Path path);
 

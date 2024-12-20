@@ -1,6 +1,7 @@
-package codes.shawlas.impl;
+package codes.shawlas.impl.metafile;
 
 import codes.shawlas.file.MetaFile;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -14,27 +15,33 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.*;
 
-public class MetaFileImpl implements MetaFile {
+public sealed class MetaFileImpl implements MetaFile permits DosMetaFile, PosixMetaFile {
 
+    protected @NotNull BasicFileAttributes basicAttr;
     private final @NotNull File file;
-    private final @NotNull BasicFileAttributes basicAttr;
-
     private final @NotNull FileDataImpl data = new FileDataImpl();
     private final @NotNull FileTimesImpl times = new FileTimesImpl();
     private final @NotNull FilePermissionsImpl permissions = new FilePermissionsImpl();
 
     public MetaFileImpl(@NotNull File file) throws IOException {
         this.file = file;
-        this.basicAttr = Files.getFileAttributeView(file.toPath(), BasicFileAttributeView.class).readAttributes();
+        this.basicAttr = Files.readAttributes(file.toPath(), BasicFileAttributes.class);
     }
 
-    public @NotNull JsonObject serialize() {
-        @NotNull JsonObject object = new JsonObject();
+    protected MetaFileImpl(@NotNull File file, @NotNull Class<? extends @NotNull BasicFileAttributes> type) throws IOException {
+        this.file = file;
+        this.basicAttr = Files.readAttributes(file.toPath(), type);
+    }
 
-        object.addProperty("name", getName());
-        object.addProperty("type", getType());
-        object.addProperty("key", getKey());
-        object.addProperty("path", getPath().toString());
+    public @NotNull JsonElement serialize() {
+        @NotNull JsonObject general = new JsonObject();
+        general.addProperty("name", getName());
+        general.addProperty("type", isDirectory() ? "folder" : "file");
+        general.addProperty("key", getKey());
+        general.addProperty("path", getPath().toString());
+
+        @NotNull JsonObject object = new JsonObject();
+        object.add("general", general);
 
         object.add("data", this.data.serialize());
         object.add("times", this.times.serialize());
@@ -49,9 +56,12 @@ public class MetaFileImpl implements MetaFile {
         return getPath().getFileName().toString();
     }
 
-    public final @Nullable String getType() {
-        int index = getName().lastIndexOf(".");
-        return index > 0 ? getName().substring(index) : null;
+    public final boolean isDirectory() {
+        return basicAttr.isDirectory();
+    }
+
+    public final boolean isFile() {
+        return basicAttr.isRegularFile();
     }
 
     @Override
@@ -71,7 +81,7 @@ public class MetaFileImpl implements MetaFile {
     }
 
     @Override
-    public final @NotNull FilePermissions getPermissions() {
+    public @NotNull FilePermissions getPermissions() {
         return permissions;
     }
 
@@ -157,9 +167,9 @@ public class MetaFileImpl implements MetaFile {
 
         private @NotNull JsonObject serialize() {
             @NotNull JsonObject object = new JsonObject();
-            object.addProperty("readable", isFullyReadable());
-            object.addProperty("writable", isFullyWritable());
-            object.addProperty("executable", isFullyExecutable());
+            object.addProperty("fullReadable", isFullyReadable());
+            object.addProperty("fullWritable", isFullyWritable());
+            object.addProperty("fullExecutable", isFullyExecutable());
 
             return object;
         }

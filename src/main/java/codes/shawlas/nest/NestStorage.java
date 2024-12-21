@@ -20,8 +20,6 @@ public interface NestStorage {
 
     interface Nests extends NamedContent<@NotNull Nest<?>>  {
 
-        @NotNull NestStorage getNestStorage();
-
         /**
          * @throws NameAlreadyExistsException if {@code name} is already in use
          * */

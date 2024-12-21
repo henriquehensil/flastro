@@ -1,6 +1,5 @@
 package codes.shawlas.file;
 
-import codes.shawlas.content.NamedContent;
 import codes.shawlas.database.Database;
 import codes.shawlas.exception.file.FileAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
@@ -18,43 +17,41 @@ public interface FileStorage {
 
     @NotNull Path getDefault();
 
-    @NotNull Files getFiles();
+    @NotNull Storages getFiles();
 
     // Classes
 
-    interface Files extends NamedContent<@NotNull MetaFile> {
+    interface Storages extends Iterable<@NotNull MetaFile> {
 
         /**
+         * Create an empty file
+         *
          * @throws FileAlreadyExistsException if {@code name} is already in use
          * @throws IOException if an I/O error occurs
          * */
         @NotNull MetaFile create(@NotNull String name) throws FileAlreadyExistsException, IOException;
 
         /**
-         * @throws FileAlreadyExistsException if {@code folder} and {@code name} is already in use
+         * Create an empty file into directory
+         *
+         * @throws FileAlreadyExistsException if {@code name} is already in use in the directory
          * @throws IOException if an I/O error occurs
          * */
-        @NotNull MetaFile create(@NotNull String folder, @NotNull String name) throws FileAlreadyExistsException, IOException;
+        @NotNull MetaFile create(@NotNull String directory, @NotNull String name) throws FileAlreadyExistsException, IOException;
 
         /**
-         * @throws FileAlreadyExistsException if {@code File} is already stored
+         * Stores an uploaded file
+         *
+         * @throws UnsupportedOperationException if file path is incorrect. this includes it being a directory
+         * @throws FileAlreadyExistsException if file name is already stored in this path
          * @throws IOException if an I/O error occurs
          * */
-        @NotNull MetaFile create(@NotNull File file) throws FileAlreadyExistsException, IOException;
-
-        @NotNull Optional<@NotNull MetaFile> get(@NotNull Path path);
+        @NotNull MetaFile store(@NotNull File file) throws FileAlreadyExistsException, IOException;
 
         boolean delete(@NotNull Path path);
 
-        // Implementations
+        @NotNull Optional<? extends @NotNull MetaFile> get(@NotNull Path path);
 
-        @Override
-        @NotNull Optional<@NotNull MetaFile> get(@NotNull String name);
-
-        @Override
-        boolean delete(@NotNull String name);
-
-        @Override
-        @Unmodifiable @NotNull Collection<@NotNull MetaFile> toCollection();
+        @Unmodifiable @NotNull Collection<? extends @NotNull MetaFile> toCollection();
     }
 }

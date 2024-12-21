@@ -1,13 +1,11 @@
 package codes.shawlas.impl.metafile;
 
-import codes.shawlas.file.AbstractMetaFile;
 import codes.shawlas.file.DosMetaFile;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.attribute.DosFileAttributes;
 
 public final class SimpleDosMetaFile extends AbstractMetaFile implements DosMetaFile {
@@ -16,7 +14,7 @@ public final class SimpleDosMetaFile extends AbstractMetaFile implements DosMeta
     private final @NotNull FatAttributes fat = new FatAttributesImpl();
 
     public SimpleDosMetaFile(@NotNull File file) throws IOException {
-        super(file, Files.readAttributes(file.toPath(), DosFileAttributes.class));
+        super(file, DosFileAttributes.class);
         this.attributes = (DosFileAttributes) super.attributes;
     }
 

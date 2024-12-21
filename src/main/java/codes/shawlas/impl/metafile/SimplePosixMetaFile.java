@@ -1,6 +1,5 @@
 package codes.shawlas.impl.metafile;
 
-import codes.shawlas.file.AbstractMetaFile;
 import codes.shawlas.file.PosixMetaFile;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -8,7 +7,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.attribute.PosixFileAttributes;
 import java.nio.file.attribute.PosixFilePermission;
 
@@ -18,7 +16,7 @@ public final class SimplePosixMetaFile extends AbstractMetaFile implements Posix
     private final @NotNull PosixFileAttributes attributes;
 
     public SimplePosixMetaFile(@NotNull File file) throws IOException {
-        super(file, Files.readAttributes(file.toPath(), PosixFileAttributes.class));
+        super(file, PosixFileAttributes.class);
         this.attributes = (PosixFileAttributes) super.attributes;
     }
 

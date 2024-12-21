@@ -1,15 +1,32 @@
 package codes.shawlas.file;
 
+import codes.shawlas.impl.metafile.SimpleDosMetaFile;
+import codes.shawlas.impl.metafile.SimpleMetaFile;
+import codes.shawlas.impl.metafile.SimplePosixMetaFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
+import java.nio.file.attribute.*;
 
 public interface MetaFile {
+
+    static @NotNull MetaFile create(@NotNull File file) throws IOException {
+        @NotNull Path path = file.toPath();
+
+        if (Files.getFileAttributeView(path, DosFileAttributeView.class) != null) {
+            return new SimpleDosMetaFile(file);
+        } else if (Files.getFileAttributeView(path, PosixFileAttributeView.class) != null) {
+            return new SimplePosixMetaFile(file);
+        } else {
+            return new SimpleMetaFile(file);
+        }
+    }
 
     /**
      * @return The Key represented in String or {@code null} if key is not founded

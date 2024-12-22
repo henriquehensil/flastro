@@ -2,7 +2,7 @@ package codes.shawlas.table;
 
 import codes.shawlas.DataType;
 import codes.shawlas.content.UnmodifiableContent;
-import codes.shawlas.exception.NameAlreadyExistsException;
+import codes.shawlas.exception.column.ColumnAlreadyExistsException;
 import codes.shawlas.exception.key.DuplicatedKeyValueException;
 import codes.shawlas.exception.key.MissingKeyException;
 import codes.shawlas.exception.table.TableStateException;
@@ -34,9 +34,13 @@ public interface Table {
          * */
         @NotNull Element create(@NotNull TableData<?> @NotNull ... data) throws MissingKeyException, DuplicatedKeyValueException, TableStateException;
 
-        boolean remove(int index);
+        @NotNull Optional<? extends @NotNull Element> get(long index);
 
-        @NotNull Optional<? extends @NotNull Element> get(int index);
+        @NotNull Optional<? extends @NotNull Element> getById(@NotNull String id);
+
+        boolean remove(long index);
+
+        boolean removeById(@NotNull String id);
 
         @Override
         @Unmodifiable @NotNull Collection<@NotNull Element> toCollection();
@@ -47,19 +51,23 @@ public interface Table {
         @NotNull Table getTable();
 
         /**
-         * @throws NameAlreadyExistsException if name is already in use
+         * @throws ColumnAlreadyExistsException if name is already in use
          * */
-        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws NameAlreadyExistsException;
+        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws ColumnAlreadyExistsException;
 
         /**
-         * @throws NameAlreadyExistsException if the name is already in use
+         * @throws ColumnAlreadyExistsException if the name is already in use
          * @throws TableStateException if the table elements is not empty
          * */
-        <E> @NotNull Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExistsException, TableStateException;
+        <E> @NotNull Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnAlreadyExistsException, TableStateException;
 
         @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String name);
 
-        boolean remove(@NotNull String columnId);
+        @NotNull Optional<? extends @NotNull Column<?>> getById(@NotNull String id);
+
+        boolean remove(@NotNull String name);
+
+        boolean removeById(@NotNull String id);
 
         @Override
         @Unmodifiable @NotNull Collection<@NotNull Column<?>> toCollection();

@@ -6,12 +6,11 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.Collection;
 import java.util.Optional;
 
-public interface NamedContent<V> extends UnmodifiableContent<V> {
+public interface NamedContent<V> {
 
-    @NotNull Optional<? extends V> get(@NotNull String name);
+    @NotNull Optional<? extends @NotNull V> get(@NotNull String name);
 
     boolean delete(@NotNull String name);
 
-    @Override
-    @Unmodifiable @NotNull Collection<V> toCollection();
+    @Unmodifiable @NotNull Collection<? extends @NotNull V> toCollection();
 }

@@ -1,7 +1,6 @@
 package codes.shawlas.table;
 
 import codes.shawlas.DataType;
-import codes.shawlas.content.UnmodifiableContent;
 import codes.shawlas.exception.column.ColumnAlreadyExistsException;
 import codes.shawlas.exception.key.DuplicatedKeyValueException;
 import codes.shawlas.exception.key.MissingKeyException;
@@ -23,7 +22,7 @@ public interface Table {
 
     // Classes
 
-    interface Elements extends UnmodifiableContent<@NotNull Element> {
+    interface Elements {
 
         @NotNull Table getTable();
 
@@ -42,11 +41,10 @@ public interface Table {
 
         boolean removeById(@NotNull String id);
 
-        @Override
-        @Unmodifiable @NotNull Collection<@NotNull Element> toCollection();
+        @Unmodifiable @NotNull Collection<? extends @NotNull Element> toCollection();
     }
 
-    interface Columns extends UnmodifiableContent<@NotNull Column<?>> {
+    interface Columns {
 
         @NotNull Table getTable();
 
@@ -69,7 +67,6 @@ public interface Table {
 
         boolean removeById(@NotNull String id);
 
-        @Override
-        @Unmodifiable @NotNull Collection<@NotNull Column<?>> toCollection();
+        @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> toCollection();
     }
 }

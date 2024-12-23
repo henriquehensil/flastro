@@ -35,6 +35,6 @@ public interface TableStorage {
         boolean delete(@NotNull String name);
 
         @Override
-        @Unmodifiable @NotNull Collection<@NotNull Table> toCollection();
+        @Unmodifiable @NotNull Collection<? extends @NotNull Table> toCollection();
     }
 }

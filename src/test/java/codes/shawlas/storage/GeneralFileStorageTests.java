@@ -3,7 +3,6 @@ package codes.shawlas.storage;
 import codes.shawlas.Context;
 import codes.shawlas.Exceptionally;
 import codes.shawlas.FieldsProviders;
-import codes.shawlas.exception.InvalidNameException;
 import codes.shawlas.exception.file.FileAlreadyExistsException;
 import codes.shawlas.file.MetaFile;
 import codes.shawlas.impl.core.FileStorageImpl;
@@ -14,6 +13,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
+import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -34,7 +34,9 @@ public final class GeneralFileStorageTests implements Context, Exceptionally {
         Assertions.assertFalse(files.iterator().hasNext());
         Assertions.assertFalse(files.get(path).isPresent());
         Assertions.assertFalse(files.get(Paths.get("non/existent/path")).isPresent());
+
         Assertions.assertFalse(files.delete(path));
+        Assertions.assertFalse(files.delete(storage.getDefault()));
     }
 
     @Test
@@ -66,6 +68,9 @@ public final class GeneralFileStorageTests implements Context, Exceptionally {
 
         Assertions.assertEquals(2, files.toCollection().size());
         clearAll(files);
+
+        Assertions.assertTrue(files.delete(Paths.get("java", "folder")));
+        Assertions.assertTrue(files.delete(Paths.get("java")));
     }
 
     private void clearAll(@NotNull StoragesImpl files) {
@@ -84,17 +89,35 @@ public final class GeneralFileStorageTests implements Context, Exceptionally {
         InvalidFoldersExceptionally(files);
         InvalidFileExceptionally(files);
 
+        @NotNull Path path = storage.getDefault().resolve("TestIfExists");
+        Files.deleteIfExists(path);
+
+        files.create("TestIfExists");
+        Assertions.assertTrue(files.get(Paths.get("TestIfExists")).isPresent());
+        Assertions.assertTrue(files.get(path).isPresent());
+
+        path = path.getParent().resolve("anFolder\\TestIfExists");
+        Files.deleteIfExists(path);
+
+        files.create("anFolder" ,"TestIfExists");
+        Assertions.assertTrue(files.get(Paths.get("anFolder/TestIfExists")).isPresent());
+        Assertions.assertTrue(files.get(path).isPresent());
+
         try {
-            files.create("static_file");
+            files.create("TestIfExists");
             Assertions.fail();
         } catch (FileAlreadyExistsException ignore) {
             //
         } try {
-            files.create("static_folder", "file");
+            files.create("anFolder", "TestIfExists");
             Assertions.fail();
         } catch (FileAlreadyExistsException ignore) {
             //
         }
+
+        clearAll(files);
+
+        Assertions.assertTrue(files.delete(Paths.get("anFolder")));
     }
 
     private void InvalidNamesExceptionally(@NotNull StoragesImpl files) throws Throwable {

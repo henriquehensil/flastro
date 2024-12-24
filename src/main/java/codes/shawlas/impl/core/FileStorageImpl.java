@@ -1,7 +1,6 @@
 package codes.shawlas.impl.core;
 
 import codes.shawlas.database.Database;
-import codes.shawlas.exception.InvalidNameException;
 import codes.shawlas.exception.file.FileAlreadyExistsException;
 import codes.shawlas.file.FileStorage;
 import codes.shawlas.file.MetaFile;
@@ -11,10 +10,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.InvalidPathException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.util.*;
 
 public final class FileStorageImpl implements FileStorage {
@@ -22,12 +18,17 @@ public final class FileStorageImpl implements FileStorage {
     // Objects
     private final @NotNull Object lock = new Object();
     private final @NotNull Database database;
-    private final @NotNull Path path;
+    private final @NotNull Path folder;
     private final @NotNull StoragesImpl files = new StoragesImpl();
 
-    FileStorageImpl(@NotNull Database database, @NotNull Path path) {
+    FileStorageImpl(@NotNull Database database, @NotNull Path folder) {
         this.database = database;
-        this.path = path;
+        this.folder = folder;
+        try {
+            Files.createDirectories(folder);
+        } catch (Throwable e) {
+            throw new RuntimeException("Cannot create folder: " + e);
+        }
     }
 
     @Override
@@ -37,7 +38,7 @@ public final class FileStorageImpl implements FileStorage {
 
     @Override
     public @NotNull Path getDefault() {
-        return path;
+        return folder;
     }
 
     @Override
@@ -141,7 +142,17 @@ public final class FileStorageImpl implements FileStorage {
         @Override
         public boolean delete(@NotNull Path path) {
             path = path.startsWith(getDefault()) ? path : getDefault().resolve(path);
-            return fileMap.remove(path) != null && path.toFile().delete();
+            if (path.equals(getDefault())) {
+                return false;
+            } else synchronized (lock) {
+                try {
+                    Files.delete(path);
+                    fileMap.remove(path);
+                    return true;
+                } catch (Throwable e) {
+                    return false;
+                }
+            }
         }
 
         @Override

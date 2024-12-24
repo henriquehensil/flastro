@@ -1,4 +1,4 @@
-package codes.shawlas.exception.key;
+package codes.shawlas.exception.column;
 
 public class MissingKeyException extends Exception {
     public MissingKeyException(String message) {

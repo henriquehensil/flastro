@@ -1,9 +1,9 @@
 package codes.shawlas.nest;
 
 import codes.shawlas.DataType;
-import codes.shawlas.content.UnmodifiableContent;
 import codes.shawlas.exception.nest.NestAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
@@ -11,33 +11,27 @@ import java.util.Optional;
 
 public interface Nest<T> {
 
-    @NotNull NestStorage getStorage();
+    @Nullable Nest<?> getFather();
 
-    @NotNull Children getSubs();
+    @NotNull String getId();
 
     @NotNull Optional<T> getValue(@NotNull String key);
 
     boolean put(@NotNull String key, T value);
 
+    @NotNull SubNests getSubs();
+
     @NotNull DataType<T> getDataType();
 
     @Unmodifiable @NotNull Collection<T> getValues();
 
-    // Classes
+    /**
+     * An Interface that encapsulates sub nests
+     * */
+    interface SubNests extends NestStorage.Nests {
 
-    interface Children extends UnmodifiableContent<@NotNull Nest<?>> {
-
-        /**
-         * @throws NestAlreadyExistsException if the ID already in use
-         * */
-        <E> @NotNull Nest<E> createSub(@NotNull String id, @NotNull DataType<E> dataType) throws NestAlreadyExistsException;
-
-        @NotNull Optional<? extends @NotNull Nest<?>> getSub(@NotNull String id);
-
-        boolean delete(@NotNull String id);
-
-        @Override
-        @Unmodifiable @NotNull Collection<@NotNull Nest<?>> toCollection();
-
+        default boolean exists(@NotNull String id) {
+            return getById(id).isPresent();
+        }
     }
 }

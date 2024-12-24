@@ -4,6 +4,7 @@ import codes.shawlas.DataType;
 import codes.shawlas.content.NamedContent;
 import codes.shawlas.database.Database;
 import codes.shawlas.exception.NameAlreadyExistsException;
+import codes.shawlas.exception.nest.NestAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -18,23 +19,21 @@ public interface NestStorage {
 
     // Classes
 
-    interface Nests extends NamedContent<@NotNull Nest<?>>  {
+    interface Nests {
 
         /**
-         * @throws NameAlreadyExistsException if {@code name} is already in use
+         * @throws NestAlreadyExistsException if {@code name} is already in use
          * */
-        <E> @NotNull Nest<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NameAlreadyExistsException;
+        <E> @NotNull Nest<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NestAlreadyExistsException;
 
-        // Implementations
-
-        @Override
         @NotNull Optional<? extends @NotNull Nest<?>> get(@NotNull String name);
 
-        @Override
+        @NotNull Optional<? extends @NotNull Nest<?>> getById(@NotNull String id);
+
         boolean delete(@NotNull String name);
 
-        @Override
-        @Unmodifiable
-        @NotNull Collection<@NotNull Nest<?>> toCollection();
+        boolean deleteById(@NotNull String name);
+
+        @Unmodifiable @NotNull Collection<@NotNull Nest<?>> toCollection();
     }
 }

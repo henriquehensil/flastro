@@ -2,7 +2,6 @@ package codes.shawlas.impl.metafile;
 
 import codes.shawlas.exception.file.InvalidFileAttributesException;
 import codes.shawlas.file.MetaFile;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -66,7 +65,7 @@ public abstract class AbstractMetaFile implements MetaFile {
         }
     }
 
-    public abstract @NotNull JsonElement serialize();
+    public abstract @NotNull JsonObject serialize();
 
     // Getters
 
@@ -157,5 +156,19 @@ public abstract class AbstractMetaFile implements MetaFile {
         public boolean isFullyExecutable() {
             return file.canExecute();
         }
+    }
+
+    // Native
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        final @NotNull SimpleDosMetaFile that = (SimpleDosMetaFile) o;
+        return this.serialize().equals(that.serialize());
+    }
+
+    @Override
+    public int hashCode() {
+        return serialize().hashCode();
     }
 }

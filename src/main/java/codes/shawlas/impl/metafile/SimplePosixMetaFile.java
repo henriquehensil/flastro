@@ -1,7 +1,6 @@
 package codes.shawlas.impl.metafile;
 
 import codes.shawlas.file.PosixMetaFile;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
@@ -21,7 +20,7 @@ public final class SimplePosixMetaFile extends AbstractMetaFile implements Posix
     }
 
     @Override
-    public @NotNull JsonElement serialize() {
+    public @NotNull JsonObject serialize() {
         @NotNull JsonObject owners = new JsonObject();
         owners.addProperty("user", getPermissions().getUser().getName());
         owners.addProperty("group", getPermissions().getGroup().getName());

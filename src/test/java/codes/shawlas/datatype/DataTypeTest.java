@@ -1,5 +1,6 @@
+package codes.shawlas.datatype;
+
 import codes.shawlas.DataType;
-import ghostface.dev.exception.DataTypeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -48,7 +49,7 @@ public final class DataTypeTest {
     @Test
     @Order(1)
     @DisplayName("tests the primitives data type")
-    public void primitives() throws IOException, DataTypeException {
+    public void primitives() throws IOException {
 
         @NotNull InputStream inputStream = getInputStream();
 
@@ -105,6 +106,4 @@ public final class DataTypeTest {
         l = DataType.LONG.read(inputStream);
         Assertions.assertEquals(1234553678689096576L, l);
     }
-
-
 }

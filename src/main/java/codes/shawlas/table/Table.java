@@ -1,9 +1,9 @@
 package codes.shawlas.table;
 
 import codes.shawlas.DataType;
-import codes.shawlas.exception.column.ColumnAlreadyExistsException;
-import codes.shawlas.exception.key.DuplicatedKeyValueException;
-import codes.shawlas.exception.key.MissingKeyException;
+import codes.shawlas.content.NamedContent;
+import codes.shawlas.exception.InvalidNameException;
+import codes.shawlas.exception.column.*;
 import codes.shawlas.exception.table.TableStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,42 +30,46 @@ public interface Table {
          * @throws MissingKeyException If the key is missing
          * @throws DuplicatedKeyValueException If the key value already exists
          * @throws TableStateException If table#getColumns is empty
+         * @throws InvalidColumnException if {@code data} has a Column which is not in the table
+         * @throws DuplicatedColumnException if data has duplicated column
          * */
-        @NotNull Element create(@NotNull TableData<?> @NotNull ... data) throws MissingKeyException, DuplicatedKeyValueException, TableStateException;
+        @NotNull Element create(@NotNull TableData<?> @NotNull ... data) throws MissingKeyException, DuplicatedKeyValueException, TableStateException, InvalidColumnException, DuplicatedColumnException;
 
         @NotNull Optional<? extends @NotNull Element> get(long index);
 
         @NotNull Optional<? extends @NotNull Element> getById(@NotNull String id);
 
-        boolean remove(long index);
+        boolean delete(long index);
 
-        boolean removeById(@NotNull String id);
+        boolean deleteById(@NotNull String id);
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Element> toCollection();
     }
 
-    interface Columns {
+    interface Columns extends NamedContent<@NotNull Column<?>> {
 
         @NotNull Table getTable();
 
         /**
-         * @throws ColumnAlreadyExistsException if name is already in use
+         * @throws ColumnAlreadyExistsException if the {@code name} is already in use
+         * @throws InvalidNameException if the {@code name} is an invalid syntax
          * */
-        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws ColumnAlreadyExistsException;
+        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E value, boolean isNullable) throws ColumnAlreadyExistsException, InvalidNameException;
 
         /**
-         * @throws ColumnAlreadyExistsException if the name is already in use
+         * @throws ColumnAlreadyExistsException if the {@code name}is already in use
          * @throws TableStateException if the table elements is not empty
+         * @throws InvalidNameException if the {@code name} is an invalid syntax
          * */
-        <E> @NotNull Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnAlreadyExistsException, TableStateException;
+        <E> @NotNull Column<E> createKey(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnAlreadyExistsException, TableStateException, InvalidNameException;
 
         @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String name);
 
         @NotNull Optional<? extends @NotNull Column<?>> getById(@NotNull String id);
 
-        boolean remove(@NotNull String name);
+        boolean delete(@NotNull String name);
 
-        boolean removeById(@NotNull String id);
+        boolean deleteById(@NotNull String id);
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> toCollection();
     }

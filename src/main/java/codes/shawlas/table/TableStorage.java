@@ -19,22 +19,9 @@ public interface TableStorage {
 
     interface Tables extends NamedContent<@NotNull Table> {
 
-        @NotNull TableStorage getStorage();
-
         /**
          * @throws TableAlreadyExistsException if {@code name} is already in use
          * */
         @NotNull Table create(@NotNull String name) throws TableAlreadyExistsException;
-
-        // Implementations
-
-        @Override
-        @NotNull Optional<? extends @NotNull Table> get(@NotNull String id);
-
-        @Override
-        boolean delete(@NotNull String name);
-
-        @Override
-        @Unmodifiable @NotNull Collection<? extends @NotNull Table> toCollection();
     }
 }

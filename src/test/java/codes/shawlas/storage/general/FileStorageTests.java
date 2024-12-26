@@ -1,4 +1,4 @@
-package codes.shawlas.storage;
+package codes.shawlas.storage.general;
 
 import codes.shawlas.Context;
 import codes.shawlas.Exceptionally;
@@ -18,7 +18,7 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public final class GeneralFileStorageTests implements Context, Exceptionally {
+public final class FileStorageTests implements Context, Exceptionally {
     private static final @NotNull FileStorageImpl storage = FieldsProviders.getFileStorage();
 
     @Test
@@ -103,17 +103,9 @@ public final class GeneralFileStorageTests implements Context, Exceptionally {
         Assertions.assertTrue(files.get(Paths.get("anFolder/TestIfExists")).isPresent());
         Assertions.assertTrue(files.get(path).isPresent());
 
-        try {
-            files.create("TestIfExists");
-            Assertions.fail();
-        } catch (FileAlreadyExistsException ignore) {
-            //
-        } try {
-            files.create("anFolder", "TestIfExists");
-            Assertions.fail();
-        } catch (FileAlreadyExistsException ignore) {
-            //
-        }
+        // File Exists
+        Assertions.assertThrows(FileAlreadyExistsException.class, () -> files.create("TestIfExists"));
+        Assertions.assertThrows(FileAlreadyExistsException.class, () -> files.create("anFolder", "TestIfExists"));
 
         clearAll(files);
 

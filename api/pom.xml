@@ -10,7 +10,7 @@
     </parent>
 
     <groupId>codes.shawlas.jdata</groupId>
-    <artifactId>api-server</artifactId>
+    <artifactId>api</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

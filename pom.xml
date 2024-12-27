@@ -7,6 +7,11 @@
     <groupId>codes.shawlas</groupId>
     <artifactId>jdata</artifactId>
     <version>1.0</version>
+    <packaging>pom</packaging>
+    <modules>
+        <module>core</module>
+        <module>api-server</module>
+    </modules>
 
     <dependencies>
         <!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->

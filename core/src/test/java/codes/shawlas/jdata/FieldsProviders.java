@@ -1,7 +1,10 @@
 package codes.shawlas.jdata;
 
-import codes.shawlas.jdata.core.database.Authentication;
-import codes.shawlas.jdata.core.impl.core.*;
+import codes.shawlas.data.core.database.Authentication;
+import codes.shawlas.data.core.impl.core.DatabaseImpl;
+import codes.shawlas.data.core.impl.core.FileStorageImpl;
+import codes.shawlas.data.core.impl.core.NestStorageImpl;
+import codes.shawlas.data.core.impl.core.TableStorageImpl;
 import org.jetbrains.annotations.NotNull;
 
 import java.net.InetSocketAddress;

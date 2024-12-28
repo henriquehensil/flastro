@@ -1,6 +1,6 @@
-package codes.shawlas.jdata.core.exception.table;
+package codes.shawlas.data.core.exception.table;
 
-import codes.shawlas.jdata.core.exception.NameAlreadyExistsException;
+import codes.shawlas.data.core.exception.NameAlreadyExistsException;
 
 public class TableAlreadyExistsException extends NameAlreadyExistsException {
     public TableAlreadyExistsException(String message) {

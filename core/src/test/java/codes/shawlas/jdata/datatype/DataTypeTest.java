@@ -1,6 +1,6 @@
 package codes.shawlas.jdata.datatype;
 
-import codes.shawlas.jdata.core.DataType;
+import codes.shawlas.data.core.DataType;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

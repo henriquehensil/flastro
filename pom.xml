@@ -10,7 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
-        <module>api-server</module>
+        <module>message</module>
     </modules>
 
     <dependencies>
@@ -47,7 +47,6 @@
             <artifactId>log4j-api</artifactId>
             <version>2.24.2</version>
         </dependency>
-
     </dependencies>
 
     <properties>

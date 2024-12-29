@@ -9,12 +9,12 @@
         <version>1.0</version>
     </parent>
 
-    <groupId>codes.shawlas.jdata</groupId>
-    <artifactId>api</artifactId>
+    <groupId>codes.shawlas.data</groupId>
+    <artifactId>message</artifactId>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>23</maven.compiler.source>
+        <maven.compiler.target>23</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

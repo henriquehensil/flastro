@@ -48,7 +48,7 @@ public final class ColumnsImpl implements Table.Columns, Iterable<@NotNull Colum
             throw new ColumnAlreadyExistsException("Column name already exists: " + name);
         } else synchronized (lock) {
             final @NotNull UUID id = generate();
-            final @NotNull ColumnImpl<E> column = new ColumnImpl<>(id, name, table, dataType, isNullable, value);
+            final @NotNull ColumnImpl<E> column = new ColumnImpl<>(id, name, table, dataType, value, isNullable);
             columns.add(column);
             return column;
         }

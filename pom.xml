@@ -11,6 +11,7 @@
     <modules>
         <module>core</module>
         <module>message</module>
+        <module>commons</module>
     </modules>
 
     <dependencies>

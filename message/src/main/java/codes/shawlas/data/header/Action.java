@@ -1,6 +1,7 @@
 package codes.shawlas.data.header;
 
 import codes.shawlas.data.MessageModel;
+import codes.shawlas.data.exception.MessageParseException;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 
@@ -10,7 +11,7 @@ public interface Action extends CharSequence {
 
     @NotNull String getItem();
 
-    @NotNull MessageModel getModel(@NotNull Identifier identifier, @NotNull JsonObject data);
+    @NotNull MessageModel getModel(@NotNull Identifier identifier, @NotNull JsonObject data) throws MessageParseException;
 
     // CharSequence implementations
 

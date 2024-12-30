@@ -1,7 +1,7 @@
 package codes.shawlas.data.message;
 
 import codes.shawlas.data.MessageModel;
-import codes.shawlas.data.exception.message.MessageParseException;
+import codes.shawlas.data.exception.MessageParseException;
 import codes.shawlas.data.message.header.ActionImpl;
 import codes.shawlas.data.message.header.IdentifierImpl;
 import com.google.gson.JsonObject;
@@ -23,6 +23,7 @@ public final class MessageStructure implements MessageModel {
         } else if (!ActionImpl.contains(new ActionImpl(action[0], action[1]))) {
             return false;
         } else try {
+            if (!parts[1].contains("IDENTIFIER: ")) return false;
             return Integer.parseInt(parts[1].replace("IDENTIFIER: ", "")) >= 0;
         } catch (Throwable e) {
             return false;
@@ -41,7 +42,7 @@ public final class MessageStructure implements MessageModel {
         }
     }
 
-    public static @NotNull MessageStructure parse(@NotNull String message) {
+    public static @NotNull MessageStructure parse(@NotNull String message) throws MessageParseException {
         @NotNull String @NotNull [] parts = message.split("\r\n\r\n");
         if (!isValidHeader(parts[0])) {
             throw new MessageParseException("Cannot parse '" + message + "' as a valid header");
@@ -62,7 +63,7 @@ public final class MessageStructure implements MessageModel {
         }
     }
 
-    public static @NotNull MessageStructure parse(@NotNull String message, @NotNull JsonObject data) {
+    public static @NotNull MessageStructure parse(@NotNull String message, @NotNull JsonObject data) throws MessageParseException {
         if (!isValidHeader(message)) {
             throw new MessageParseException("Cannot parse '" + message + "' as a valid header");
         } else try {

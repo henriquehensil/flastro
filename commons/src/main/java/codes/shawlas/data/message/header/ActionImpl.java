@@ -1,5 +1,6 @@
 package codes.shawlas.data.message.header;
 
+import codes.shawlas.data.exception.MessageParseException;
 import codes.shawlas.data.header.Action;
 import codes.shawlas.data.header.Identifier;
 import codes.shawlas.data.message.MessageStructure;
@@ -98,8 +99,8 @@ public final class ActionImpl implements Action {
     }
 
     @Override
-    public @NotNull MessageStructure getModel(@NotNull Identifier identifier, @NotNull JsonObject data) {
-        return null;
+    public @NotNull MessageStructure getModel(@NotNull Identifier identifier, @NotNull JsonObject data) throws MessageParseException {
+        return MessageStructure.parse(this + "\r\n"  + identifier,  data);
     }
 
     @Override

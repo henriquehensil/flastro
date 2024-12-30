@@ -1,6 +1,7 @@
 package codes.shawlas.data.message.header;
 
 import codes.shawlas.data.MessageModel;
+import codes.shawlas.data.exception.MessageParseException;
 import codes.shawlas.data.header.Action;
 import codes.shawlas.data.header.Identifier;
 import codes.shawlas.data.message.MessageStructure;
@@ -26,7 +27,7 @@ public final class IdentifierImpl implements Identifier {
     }
 
     @Override
-    public @NotNull MessageModel getModel(@NotNull Action action, @NotNull JsonObject data) {
+    public @NotNull MessageModel getModel(@NotNull Action action, @NotNull JsonObject data) throws MessageParseException {
         return MessageStructure.parse(action + "\r\n" + this, data);
     }
 

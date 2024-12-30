@@ -1,6 +1,7 @@
 package codes.shawlas.data.header;
 
 import codes.shawlas.data.MessageModel;
+import codes.shawlas.data.exception.MessageParseException;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -9,7 +10,7 @@ public interface Identifier extends CharSequence {
 
     @Range(from = 0, to = Long.MAX_VALUE) int getId();
 
-    @NotNull MessageModel getModel(@NotNull Action action, @NotNull JsonObject data);
+    @NotNull MessageModel getModel(@NotNull Action action, @NotNull JsonObject data) throws MessageParseException;
 
     // CharSequence implementations
 

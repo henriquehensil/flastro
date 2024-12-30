@@ -1,5 +1,4 @@
-import codes.shawlas.data.MessageModel;
-import codes.shawlas.data.exception.message.MessageParseException;
+import codes.shawlas.data.exception.MessageParseException;
 import codes.shawlas.data.message.MessageStructure;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.NotNull;

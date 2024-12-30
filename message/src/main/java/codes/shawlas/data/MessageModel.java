@@ -13,10 +13,21 @@ public interface MessageModel extends CharSequence {
 
     @NotNull Action getAction();
 
+    /**
+     * @return The message identifier.
+     * <br>
+     * <p>This is not just limited by a simple identifier and can be able to linked I/O messages</p>
+     * */
     @NotNull Identifier getIdentifier();
 
+    /**
+     * @return The message body data
+     * */
     @NotNull JsonObject getData();
 
+    /**
+     * @return The Message without data
+     * */
     @NotNull String getHeader();
 
     /**
@@ -24,20 +35,22 @@ public interface MessageModel extends CharSequence {
      * */
     @NotNull String getFull();
 
-    default byte @NotNull [] getBytes() {
-        return getFull().getBytes();
-    }
-
     // CharSequence Implementations
 
     @Override
-    int length();
+    default int length() {
+        return toString().length();
+    }
 
     @Override
-    char charAt(int index);
+    default char charAt(int index) {
+        return toString().charAt(index);
+    }
 
     @Override
-    @NotNull CharSequence subSequence(int start, int end);
+    default @NotNull CharSequence subSequence(int start, int end) {
+        return toString().subSequence(start, end);
+    }
 
     @Override
     @NotNull String toString();

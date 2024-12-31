@@ -35,7 +35,7 @@ public final class ActionImpl implements Action {
     }
 
     public static @Unmodifiable @NotNull Set<@NotNull ActionImpl> toSet() {
-        return Collections.unmodifiableSet(actions);
+        return Set.copyOf(actions);
     }
 
     // Providers
@@ -62,6 +62,7 @@ public final class ActionImpl implements Action {
     public static final @NotNull ActionImpl CREATE_TABLE = new ActionImpl("CREATE", "TABLE");
     public static final @NotNull ActionImpl CREATE_ELEMENT = new ActionImpl("CREATE", "ELEMENT");
     public static final @NotNull ActionImpl CREATE_COLUMN = new ActionImpl("CREATE", "COLUMN");
+    public static final @NotNull ActionImpl CREATE_COLUMN_KEY = new ActionImpl("CREATE", "COLUMN KEY");
     public static final @NotNull ActionImpl CREATE_NEST = new ActionImpl("CREATE", "NEST");
 
     // Loaders
@@ -70,7 +71,7 @@ public final class ActionImpl implements Action {
         for (@NotNull Field field : ActionImpl.class.getFields()) {
             if (Modifier.isStatic(field.getModifiers()) && Modifier.isPublic(field.getModifiers())) {
                 try {
-                    actions.add((ActionImpl) field.get(null));
+                    add((ActionImpl) field.get(null));
                 } catch (IllegalAccessException e) {
                     throw new RuntimeException("Cannot load the action fields", e);
                 }

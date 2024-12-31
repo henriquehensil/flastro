@@ -1,6 +1,6 @@
 package codes.shawlas.data;
 
-import com.google.gson.JsonElement;
+import codes.shawlas.data.exception.MessageFinishException;
 import com.google.gson.JsonObject;
 import org.jetbrains.annotations.Blocking;
 import org.jetbrains.annotations.NotNull;
@@ -15,16 +15,17 @@ public interface Message {
 
     // Classes
 
-    interface InputMessage extends Message {
+    interface Input extends Message {
 
         /**
          * @return An OutputMessage based on this input message
+         *
+         * @throws MessageFinishException if message was finished
          * */
-        @NotNull OutputMessage execute();
-
+        @NotNull Message.Output execute() throws MessageFinishException;
     }
 
-    interface OutputMessage extends Message {
+    interface Output extends Message {
 
         @Blocking
         default void write(@NotNull OutputStream output) throws IOException {

@@ -35,6 +35,8 @@ public interface MessageModel extends CharSequence {
      * */
     @NotNull String getFull();
 
+    boolean isFinished();
+
     // CharSequence Implementations
 
     @Override

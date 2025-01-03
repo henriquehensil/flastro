@@ -40,6 +40,8 @@ public final class ActionImpl implements Action {
 
     // Providers
 
+    public static final @NotNull ActionImpl AUTHENTICATION = new ActionImpl("AUTH", "DATABASE");
+
     public static final @NotNull ActionImpl GET_FILE = new ActionImpl("GET", "FILE");
     public static final @NotNull ActionImpl GET_TABLE = new ActionImpl("GET", "TABLE");
     public static final @NotNull ActionImpl GET_ELEMENT = new ActionImpl("GET", "ELEMENT");

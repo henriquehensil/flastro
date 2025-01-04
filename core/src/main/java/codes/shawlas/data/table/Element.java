@@ -1,6 +1,5 @@
 package codes.shawlas.data.table;
 
-import codes.shawlas.data.content.EntryData;
 import codes.shawlas.data.exception.ColumnException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

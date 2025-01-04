@@ -1,7 +1,6 @@
 package codes.shawlas.data.table;
 
 import codes.shawlas.data.DataType;
-import codes.shawlas.data.content.EntryData;
 import codes.shawlas.data.exception.ColumnException.ColumnAlreadyExistsException;
 import codes.shawlas.data.exception.ColumnException;
 import codes.shawlas.data.exception.TableException.NoEmptyTableException;

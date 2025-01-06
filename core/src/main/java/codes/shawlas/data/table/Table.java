@@ -9,7 +9,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public interface Table {
 
@@ -35,7 +37,6 @@ public interface Table {
         boolean delete(int index);
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Element> getAll();
-
     }
 
     interface Columns {
@@ -55,10 +56,14 @@ public interface Table {
          * */
         <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E defaultValue, boolean isNullable) throws ColumnException;
 
-        @NotNull Optional<@NotNull Column<?>> get(@NotNull String columnName);
+        @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String columnName);
 
         boolean delete(@NotNull String columnName);
 
-        @Unmodifiable @NotNull Collection<@NotNull Column<?>> getAll();
+        @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getAll();
+
+        default @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getKey() {
+            return Collections.unmodifiableCollection(getAll().stream().filter(Column::isKey).collect(Collectors.toList()));
+        }
     }
 }

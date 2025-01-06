@@ -1,10 +1,48 @@
-package codes.shawlas.data.core;
+package codes.shawlas.data;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
 public interface DataType<T> {
+
+    @NotNull DataType<File> FILE = new DataType<File>() {
+        @Override
+        public @NotNull File read(@NotNull InputStream inputStream) throws IOException {
+            @NotNull File file = File.createTempFile("datatype", "file_temp");
+            try (@NotNull FileOutputStream out = new FileOutputStream(file)) {
+                byte @NotNull [] bytes = new byte[8192]; // 8kb
+
+                int read;
+                while ((read = inputStream.read(bytes)) != -1) {
+                    out.write(bytes, 0, read);
+                    out.flush();
+                }
+
+                return file;
+            }
+        }
+
+        @Override
+        public void write(@NotNull OutputStream outputStream, @NotNull File data) throws IOException {
+            try (@NotNull FileInputStream input = new FileInputStream(data)) {
+                byte @NotNull [] bytes = new byte[8192]; // 8kb
+
+                int read;
+                while ((read = input.read(bytes)) != -1) {
+                    outputStream.write(bytes, 0, read);
+                    outputStream.flush();
+                }
+            }
+        }
+
+        @Override
+        public @NotNull Class<File> getType() {
+            return File.class;
+        }
+    };
+
+    // Primitives
 
     @NotNull DataType<String> STRING = new DataType<String>() {
         @Override

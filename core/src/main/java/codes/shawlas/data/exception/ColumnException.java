@@ -5,6 +5,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ColumnException extends Exception {
     public ColumnException(@NotNull String message) {
@@ -25,6 +27,10 @@ public class ColumnException extends Exception {
         public ColumnTypeException(@NotNull Column<?> column, @Nullable Object value) {
             super("Cannot accept the value: '" + value + "'because the column " + (column.isKey() ? "is key" : "not accept null values"));
         }
+
+        public ColumnTypeException(@NotNull String message) {
+            super(message);
+        }
     }
 
     /**
@@ -32,7 +38,7 @@ public class ColumnException extends Exception {
      * */
     public static class InvalidColumnException extends ColumnException {
         public InvalidColumnException(@NotNull Column<?> column) {
-            super("the column '" + column +"' is not present on this table");
+            super("the column '" + column + "' is not present on this table");
         }
     }
 
@@ -40,16 +46,14 @@ public class ColumnException extends Exception {
      * Throw when a column key is missing on
      * */
     public static class MissingKeyColumnException extends ColumnException {
+        public MissingKeyColumnException(@NotNull String message) {
+            super(message);
+        }
+
         public MissingKeyColumnException(@NotNull Column<?> column) {
             super("Column key is missing: " + column);
             if (!column.isKey()) {
                 throw new IllegalArgumentException("This column must to be an Key");
-            }
-        }
-        public MissingKeyColumnException(@NotNull Column<?> @NotNull ... columns) {
-            super("Column keys is missing: " + Arrays.toString(columns));
-            if (Arrays.stream(columns).anyMatch(Column::isKey)) {
-                throw new IllegalArgumentException("Some column must to be an Key");
             }
         }
     }
@@ -60,6 +64,22 @@ public class ColumnException extends Exception {
     public static class ColumnAlreadyExistsException extends ColumnException {
         public ColumnAlreadyExistsException(@NotNull Column<?> column) {
             super("Column already exists: " + column);
+        }
+    }
+
+    public static class DuplicatedKeyValueException extends ColumnException {
+        public DuplicatedKeyValueException(@NotNull String message) {
+            super(message);
+        }
+
+        public DuplicatedKeyValueException(@NotNull Object value) {
+            super("The key value is already in use: " + value);
+        }
+    }
+
+    public static class DuplicatedColumnException extends ColumnException {
+        public DuplicatedColumnException(@NotNull String message) {
+            super(message);
         }
     }
 }

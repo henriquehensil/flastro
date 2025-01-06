@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.AbstractMap;
 import java.util.Map.Entry;
+import java.util.Objects;
 
 public class EntryData<T> {
 
@@ -31,5 +32,19 @@ public class EntryData<T> {
 
     public @Unmodifiable @NotNull Entry<@NotNull Column<T>, @Nullable T> toImutableEntry() {
         return new AbstractMap.SimpleImmutableEntry<>(entry);
+    }
+
+    // Native
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        final EntryData<?> entryData = (EntryData<?>) o;
+        return Objects.equals(getColumn(), entryData.getColumn()) && Objects.equals(getValue(), entryData.getValue());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getColumn(), getValue());
     }
 }

@@ -4,7 +4,7 @@ import codes.shawlas.data.DataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface Column<T> {
+public interface Column<T> extends Comparable<@NotNull Column<?>> {
 
     @NotNull String getName();
 

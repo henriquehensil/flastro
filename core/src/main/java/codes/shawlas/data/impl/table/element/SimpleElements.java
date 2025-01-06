@@ -1,7 +1,8 @@
-package codes.shawlas.data.impl;
+package codes.shawlas.data.impl.table.element;
 
 import codes.shawlas.data.exception.ColumnException;
 import codes.shawlas.data.exception.ColumnException.*;
+import codes.shawlas.data.impl.table.TableLock;
 import codes.shawlas.data.table.Column;
 import codes.shawlas.data.table.Element;
 import codes.shawlas.data.table.EntryData;
@@ -14,60 +15,72 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-public final class SimpleElements implements Table.Elements {
+//todo rework locks
+final class SimpleElements implements Table.Elements {
 
-    private static final @NotNull AtomicInteger count = new AtomicInteger(0);
-
-    private final @NotNull SimpleTable table;
+    private final @NotNull TableLock lock;
+    private final @NotNull AtomicInteger count = new AtomicInteger(0);
     private final @NotNull Map<@NotNull AutoIncrement, @NotNull SimpleElement> rows = new TreeMap<>();
-    private final @NotNull Object lock = new Object();
+    private final @NotNull Table table;
 
-    SimpleElements(@NotNull SimpleTable table) {
+    private SimpleElements(@NotNull TableLock lock, @NotNull Table table) {
+        this.lock = lock;
         this.table = table;
     }
 
     @Override
-    public @NotNull SimpleTable getTable() {
+    public @NotNull Table getTable() {
         return table;
     }
 
     @Override
     public @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData) throws ColumnException {
-        @NotNull Set<@NotNull Column<?>> thatColumns = Arrays.stream(entryData).map(EntryData::getColumn).collect(Collectors.toSet());
+        final @NotNull Set<@NotNull Column<?>> thatColumns = Arrays.stream(entryData).map(EntryData::getColumn).collect(Collectors.toSet());
 
         if (thatColumns.size() != entryData.length) {
             throw new DuplicatedColumnException("Cannot accept duplicated column: " + Arrays.toString(entryData));
         }
 
         synchronized (lock) {
-            @NotNull Set<@NotNull Column<?>> columns = getTable().getColumns().getAll();
-            @NotNull Set<@NotNull Column<?>> keys = getTable().getColumns().getKeys();
+            @NotNull Collection<? extends @NotNull Column<?>> columns = getTable().getColumns().getAll();
 
-            if (thatColumns.stream().filter(Column::isKey).collect(Collectors.toSet()).size() != keys.size()) {
-                throw new MissingKeyColumnException("Column key is missing");
+            if (getKeys(thatColumns).size() != getKeys(columns).size()) {
+                throw new MissingKeyColumnException("Some key is missing");
             }
 
-            @NotNull SimpleElement element = new SimpleElement(getTable());
+            final @NotNull Map<@NotNull Column<?>, @Nullable Object> values = new HashMap<>();
 
             for (@NotNull EntryData<?> data : entryData) {
                 if (!columns.contains(data.getColumn())) {
-                    throw new InvalidColumnException(data.getColumn());
-                } else if (data.getColumn().isKey() && getAll().stream().anyMatch(e -> e.keysContainsValue(data.getValue()))) {
-                    throw new DuplicatedKeyValueException("The key value is already in use: " + data.getValue());
+                    throw new ColumnException.InvalidColumnException(data.getColumn());
+                } else if (data.getColumn().isKey() && containsValue(data.getValue())) {
+                    throw new ColumnException.DuplicatedKeyValueException("The key value is already in use: " + data.getValue());
                 } else {
-                    element.getValues().replace(data.getColumn(), data.getValue());
+                    values.put(data.getColumn(), data.getValue());
                 }
             }
 
-            count.incrementAndGet();
-            rows.put(new AutoIncrement(count.get()), element);
+            @NotNull SimpleElement element = new SimpleElement(lock, table, new AutoIncrement(count.incrementAndGet()));
+            element.getMap().putAll(values);
 
+            rows.put(element.getIncrement(), element);
             return element;
         }
     }
 
+    private boolean containsValue(@Nullable Object value) {
+        return getAll().stream().anyMatch(e -> ((SimpleElement) e).keysContainsValue(value));
+    }
+
+    /**
+     * Filters by key columns
+     * */
+    private @NotNull Set<Column<?>> getKeys(@NotNull Collection<? extends @NotNull Column<?>> columns) {
+        return columns.stream().filter(Column::isKey).collect(Collectors.toSet());
+    }
+
     @Override
-    public @NotNull Optional<@NotNull SimpleElement> get(int index) {
+    public @NotNull Optional<@NotNull Element> get(int index) {
         return Optional.ofNullable(rows.get(new AutoIncrement(index)));
     }
 
@@ -79,7 +92,7 @@ public final class SimpleElements implements Table.Elements {
             @Nullable Element element = get(index).orElse(null);
             if (element == null && getKey(index) == null) return false;
 
-            this.rows.remove(getKey(index));
+            rows.remove(getKey(index));
             count.decrementAndGet();
 
             @NotNull Set<@NotNull AutoIncrement> rowToModify = this.rows.keySet().stream().filter(row -> row.needDecrement(count.get())).collect(Collectors.toSet());
@@ -94,13 +107,13 @@ public final class SimpleElements implements Table.Elements {
     }
 
     @Override
-    public @Unmodifiable @NotNull Collection<@NotNull SimpleElement> getAll() {
+    public @Unmodifiable @NotNull Collection<@NotNull Element> getAll() {
         return Collections.unmodifiableCollection((rows.values()));
     }
 
     // AutoIncrement
 
-    private static final class AutoIncrement implements Comparable<@NotNull Integer> {
+    static final class AutoIncrement implements Comparable<@NotNull Integer> {
 
         private int actual;
 

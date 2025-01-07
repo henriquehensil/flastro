@@ -1,9 +1,9 @@
 package codes.shawlas.data.impl.table.column;
 
 import codes.shawlas.data.DataType;
-import codes.shawlas.data.exception.ColumnException;
-import codes.shawlas.data.exception.TableException;
-import codes.shawlas.data.impl.table.TableLock;
+import codes.shawlas.data.exception.column.ColumnAlreadyExistsException;
+import codes.shawlas.data.exception.column.ColumnException;
+import codes.shawlas.data.exception.table.NoEmptyTableException;
 import codes.shawlas.data.table.Column;
 import codes.shawlas.data.table.Table;
 import org.jetbrains.annotations.NotNull;
@@ -11,16 +11,15 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 // todo rework locks
 final class SimpleColumns implements Table.Columns {
 
-    private final @NotNull TableLock lock;
+    private final @NotNull Object lock;
     private final @NotNull Set<@NotNull Column<?>> columns = new TreeSet<>(Comparator.naturalOrder());
     private final @NotNull Table table;
 
-    private SimpleColumns(@NotNull Table table, @NotNull TableLock lock) {
+    private SimpleColumns(@NotNull Table table, @NotNull Object lock) {
         this.table = table;
         this.lock = lock;
     }
@@ -32,15 +31,15 @@ final class SimpleColumns implements Table.Columns {
 
     /**
      * @return The new column Key
-     * @throws TableException.NoEmptyTableException if already has elements in the table
-     * @throws ColumnException.ColumnAlreadyExistsException if the {@code name} is already in use
+     * @throws NoEmptyTableException if already has elements in the table
+     * @throws ColumnAlreadyExistsException if the {@code name} is already in use
      * */
     @Override
-    public @NotNull <E> Column<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnException.ColumnAlreadyExistsException, TableException.NoEmptyTableException {
+    public @NotNull <E> Column<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnAlreadyExistsException, NoEmptyTableException {
         if (table.getElements().getAll().isEmpty()) {
-            throw new TableException.NoEmptyTableException("Cannot create new Key columns because table has elements");
+            throw new NoEmptyTableException("Cannot create new Key columns because table has elements");
         } else if (get(name).isPresent()) {
-            throw new ColumnException.ColumnAlreadyExistsException(get(name).get());
+            throw new ColumnAlreadyExistsException(get(name).get());
         } else synchronized (lock) {
             final @NotNull SimpleColumn<E> column = new SimpleColumn<>(dataType, name);
             columns.add(column);
@@ -50,9 +49,11 @@ final class SimpleColumns implements Table.Columns {
 
     @Override
     public @NotNull <E> Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E defaultValue, boolean isNullable) throws ColumnException {
-        if (get(name).isPresent()) {
-            throw new ColumnException.ColumnAlreadyExistsException(get(name).get());
-        } else synchronized (lock) {
+        synchronized (lock) {
+            if (get(name).isPresent()) {
+                throw new ColumnAlreadyExistsException(get(name).get());
+            }
+
             final @NotNull SimpleColumn<E> column = new SimpleColumn<>(dataType, name, isNullable, defaultValue);
             columns.add(column);
             return column;
@@ -66,17 +67,13 @@ final class SimpleColumns implements Table.Columns {
 
     @Override
     public boolean delete(@NotNull String columnName) {
-        @Nullable Column<?> column = get(columnName).orElse(null);
-        if (column == null) {
-            return false;
-        } else synchronized (this) {
+        synchronized (lock) {
+            @Nullable Column<?> column = get(columnName).orElse(null);
+            if (column == null) return false;
             columns.remove(column);
+
             return true;
         }
-    }
-
-    public @Unmodifiable @NotNull Set<@NotNull Column<?>> getKeys() {
-        return Collections.unmodifiableSet(columns.stream().filter(Column::isKey).collect(Collectors.toSet()));
     }
 
     @Override

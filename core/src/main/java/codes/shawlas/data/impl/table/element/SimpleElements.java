@@ -1,8 +1,6 @@
 package codes.shawlas.data.impl.table.element;
 
-import codes.shawlas.data.exception.ColumnException;
-import codes.shawlas.data.exception.ColumnException.*;
-import codes.shawlas.data.impl.table.TableLock;
+import codes.shawlas.data.exception.column.*;
 import codes.shawlas.data.table.Column;
 import codes.shawlas.data.table.Element;
 import codes.shawlas.data.table.EntryData;
@@ -15,15 +13,15 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
-//todo rework locks
 final class SimpleElements implements Table.Elements {
 
-    private final @NotNull TableLock lock;
+    private final @NotNull Object lock;
+
     private final @NotNull AtomicInteger count = new AtomicInteger(0);
     private final @NotNull Map<@NotNull AutoIncrement, @NotNull SimpleElement> rows = new TreeMap<>();
     private final @NotNull Table table;
 
-    private SimpleElements(@NotNull TableLock lock, @NotNull Table table) {
+    private SimpleElements(@NotNull Object lock, @NotNull Table table) {
         this.lock = lock;
         this.table = table;
     }
@@ -52,9 +50,9 @@ final class SimpleElements implements Table.Elements {
 
             for (@NotNull EntryData<?> data : entryData) {
                 if (!columns.contains(data.getColumn())) {
-                    throw new ColumnException.InvalidColumnException(data.getColumn());
+                    throw new InvalidColumnException(data.getColumn());
                 } else if (data.getColumn().isKey() && containsValue(data.getValue())) {
-                    throw new ColumnException.DuplicatedKeyValueException("The key value is already in use: " + data.getValue());
+                    throw new DuplicatedKeyValueException("The key value is already in use: " + data.getValue());
                 } else {
                     values.put(data.getColumn(), data.getValue());
                 }

@@ -1,8 +1,7 @@
 package codes.shawlas.data.impl.table.element;
 
-import codes.shawlas.data.exception.ColumnException;
-import codes.shawlas.data.exception.ColumnException.*;
-import codes.shawlas.data.impl.table.TableLock;
+import codes.shawlas.data.exception.column.ColumnTypeException;
+import codes.shawlas.data.exception.column.InvalidColumnException;
 import codes.shawlas.data.table.Column;
 import codes.shawlas.data.table.Element;
 import codes.shawlas.data.table.EntryData;
@@ -16,10 +15,9 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-// todo: rework lock
 final class SimpleElement implements Element {
 
-    private final @NotNull TableLock lock;
+    private final @NotNull Object lock;
 
     private final @NotNull AutoIncrement increment;
     private final @NotNull Map<@NotNull Column<?>, @Nullable Object> values = new TreeMap<>(Comparator.naturalOrder());
@@ -27,7 +25,7 @@ final class SimpleElement implements Element {
 
     private final @NotNull Table table;
 
-    SimpleElement(@NotNull TableLock lock, @NotNull Table table, @NotNull AutoIncrement increment) {
+    SimpleElement(@NotNull Object lock, @NotNull Table table, @NotNull AutoIncrement increment) {
         if (table.getColumns().getAll().isEmpty()) {
             throw new IllegalStateException("No columns");
         } else for (@NotNull Column<?> column : table.getColumns().getAll()) {
@@ -51,11 +49,13 @@ final class SimpleElement implements Element {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <E> @Nullable E getValue(@NotNull Column<E> column) throws ColumnException.InvalidColumnException {
-        if (!values.containsKey(column)) {
-            throw new ColumnException.InvalidColumnException(column);
-        } else synchronized (lock) {
-            return (E) values.get(column);
+    public <E> @Nullable E getValue(@NotNull Column<E> column) throws InvalidColumnException {
+        synchronized (lock) {
+            if (!values.containsKey(column)) {
+                throw new InvalidColumnException(column);
+            } else {
+                return (E) values.get(column);
+            }
         }
     }
 
@@ -64,12 +64,13 @@ final class SimpleElement implements Element {
      * @throws ColumnTypeException if {@code column} is key or {@code value} is null but the column is not nullable
      * */
     @Override
-    public <E> void setValue(@NotNull Column<E> column, @Nullable E value) throws ColumnException.InvalidColumnException, ColumnException.ColumnTypeException {
-        if (!values.containsKey(column)) {
-            throw new ColumnException.InvalidColumnException(column);
-        } else if (column.isKey() || !column.isNullable() && value == null) {
-            throw new ColumnException.ColumnTypeException(column, value);
+    public <E> void setValue(@NotNull Column<E> column, @Nullable E value) throws InvalidColumnException, ColumnTypeException {
+        if (column.isKey() || !column.isNullable() && value == null) {
+            throw new ColumnTypeException(column, value);
         } else synchronized (lock) {
+            if (!values.containsKey(column)) {
+                throw new InvalidColumnException(column);
+            }
             values.replace(column, value);
         }
     }

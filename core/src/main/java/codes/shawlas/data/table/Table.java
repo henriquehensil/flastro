@@ -1,9 +1,9 @@
 package codes.shawlas.data.table;
 
 import codes.shawlas.data.DataType;
-import codes.shawlas.data.exception.ColumnException.ColumnAlreadyExistsException;
-import codes.shawlas.data.exception.ColumnException;
-import codes.shawlas.data.exception.TableException.NoEmptyTableException;
+import codes.shawlas.data.exception.column.ColumnAlreadyExistsException;
+import codes.shawlas.data.exception.column.ColumnException;
+import codes.shawlas.data.exception.table.NoEmptyTableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -62,7 +62,7 @@ public interface Table {
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getAll();
 
-        default @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getKey() {
+        default @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getKeys() {
             return Collections.unmodifiableCollection(getAll().stream().filter(Column::isKey).collect(Collectors.toList()));
         }
     }

@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Nullable;
 
 public interface Column<T> extends Comparable<@NotNull Column<?>> {
 
+    @NotNull Table getTable();
+
     @NotNull String getName();
 
     @NotNull DataType<T> getDataType();

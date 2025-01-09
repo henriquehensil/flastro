@@ -18,6 +18,7 @@ public interface Database {
             // noinspection unchecked
             @NotNull Class<? extends TableStorage> tableStorage = (Class<? extends TableStorage>) Class.forName("codes.shawlas.data.impl.table.SimpleTableStorage");
             @NotNull Constructor<? extends TableStorage> tsConstructor = tableStorage.getDeclaredConstructor();
+            tsConstructor.setAccessible(true);
 
             // Todo: NestStorage and FileStorage
             @NotNull TableStorage ts = tsConstructor.newInstance();
@@ -39,7 +40,7 @@ public interface Database {
         } catch (NoSuchMethodException e) {
             throw new RuntimeException("Cannot instantiate the constructor of implementation class", e);
         } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Cannot instantiate the implementation class");
+            throw new RuntimeException("Cannot instantiate the implementation class", e);
         }
     }
 

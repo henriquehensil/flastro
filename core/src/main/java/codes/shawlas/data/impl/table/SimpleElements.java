@@ -14,6 +14,7 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
+// todo: remove Element#getIncrement and elements#update
 final class SimpleElements implements Table.Elements {
 
     private final @NotNull Object lock;
@@ -33,7 +34,9 @@ final class SimpleElements implements Table.Elements {
     }
 
     @Override
-    public @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData) throws ColumnException {
+    public @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData)
+            throws DuplicatedColumnException, NoColumnsException, MissingKeyColumnException, InvalidColumnException, DuplicatedKeyValueException
+    {
         final @NotNull Set<@NotNull Column<?>> thatColumns = Arrays.stream(entryData).map(EntryData::getColumn).collect(Collectors.toSet());
 
         if (thatColumns.size() != entryData.length) {
@@ -41,6 +44,10 @@ final class SimpleElements implements Table.Elements {
         }
 
         synchronized (lock) {
+            if (table.getColumns().getAll().isEmpty()) {
+                throw new NoColumnsException("No columns");
+            }
+
             @NotNull Collection<? extends @NotNull Column<?>> columns = getTable().getColumns().getAll();
 
             if (getKeys(thatColumns).size() != getKeys(columns).size()) {
@@ -59,10 +66,11 @@ final class SimpleElements implements Table.Elements {
                 }
             }
 
-            @NotNull SimpleElement element = new SimpleElement(new AutoIncrement(this.count.incrementAndGet()));
+            @NotNull AutoIncrement increment = new AutoIncrement(count.incrementAndGet());
+            @NotNull SimpleElement element = new SimpleElement(increment);
             element.getValues().putAll(values);
 
-            this.rows.put(element.getIncrement(), element);
+            this.rows.put(increment, element);
             return element;
         }
     }
@@ -90,40 +98,42 @@ final class SimpleElements implements Table.Elements {
     }
 
     @Override
-    public @NotNull Optional<@NotNull Element> get(int index) {
-        return Optional.ofNullable(this.rows.get(new AutoIncrement(index)));
+    public @NotNull Optional<@NotNull Element> get(int row) {
+        if (row <= 0) return Optional.empty();
+
+        synchronized (lock) {
+            @Nullable AutoIncrement key = getKey(row);
+            return key == null ? Optional.empty() : Optional.of(this.rows.get(key));
+        }
     }
 
     @Override
-    public boolean delete(int index) {
-        if (index <= 0) return false;
+    public boolean delete(int row) {
+        if (row <= 0) return false;
 
         synchronized (lock) {
-            @Nullable Element element = get(index).orElse(null);
-            if (element == null && getKey(index) == null) return false;
+            @Nullable Element element = get(row).orElse(null);
+            if (element == null && getKey(row) == null) return false;
 
-            this.rows.remove(getKey(index));
+            this.rows.remove(getKey(row));
             this.count.decrementAndGet();
 
             @NotNull Set<@NotNull AutoIncrement> rowToModify = this.rows.keySet()
                     .stream()
-                    .filter(row -> row.needDecrement(this.count.get()))
+                    .filter(key -> key.actual > row)
                     .collect(Collectors.toSet());
 
-            @NotNull Collection<@NotNull SimpleElement> elementsToDecrement = this.rows.values()
-                    .stream()
-                    .filter(e -> e.getIndex() == this.count.get())
-                    .collect(Collectors.toSet());
-
-            rowToModify.forEach(AutoIncrement::decrement);
-            elementsToDecrement.forEach(e -> e.getIncrement().decrement());
+            for (@NotNull AutoIncrement increment : rowToModify) {
+                increment.decrement();
+                this.rows.get(increment).decrement();
+            }
 
             return true;
         }
     }
 
-    private @Nullable AutoIncrement getKey(int index) {
-        return rows.keySet().stream().filter(row -> row.getActual() == index).findFirst().orElse(null);
+    private @Nullable AutoIncrement getKey(int row) {
+        return rows.keySet().stream().filter(key -> key.getActual() == row).findFirst().orElse(null);
     }
 
     @Override
@@ -135,22 +145,15 @@ final class SimpleElements implements Table.Elements {
 
     private final class SimpleElement implements Element {
 
-        private final @NotNull AutoIncrement increment;
+        private int index;
         private final @NotNull Map<@NotNull Column<?>, @Nullable Object> values = new TreeMap<>(Comparator.naturalOrder());
-        private final @NotNull Set<@NotNull EntryData<?>> data = new HashSet<>();
 
         SimpleElement(@NotNull AutoIncrement increment) {
-            if (table.getColumns().getAll().isEmpty()) {
-                throw new IllegalStateException("No columns");
-            } else for (@NotNull Column<?> column : table.getColumns().getAll()) {
+            for (@NotNull Column<?> column : table.getColumns().getAll()) {
                 values.put(column, column.getDefault());
             }
 
-            this.increment = increment;
-        }
-
-        private @NotNull AutoIncrement getIncrement() {
-            return increment;
+            this.index = increment.getActual();
         }
 
         private @NotNull Map<@NotNull Column<?>, @Nullable Object> getValues() {
@@ -164,7 +167,11 @@ final class SimpleElements implements Table.Elements {
 
         @Override
         public @Range(from = 0, to = Long.MAX_VALUE) int getIndex() {
-            return increment.getActual();
+            return index;
+        }
+
+        private void decrement() {
+            index--;
         }
 
         @Override
@@ -205,7 +212,10 @@ final class SimpleElements implements Table.Elements {
 
         @Override
         public @Unmodifiable @NotNull Set<@NotNull EntryData<?>> getData() {
-            return data;
+            @NotNull Set<@NotNull EntryData<?>> data = new HashSet<>();
+            // noinspection unchecked
+            values.forEach((key, value) -> data.add(new EntryData<>((Column<Object>) key, value)));
+            return Collections.unmodifiableSet(data);
         }
 
         @Override
@@ -223,7 +233,7 @@ final class SimpleElements implements Table.Elements {
 
     // AutoIncrement
 
-    private static final class AutoIncrement implements Comparable<@NotNull Integer> {
+    private static final class AutoIncrement implements Comparable<@NotNull AutoIncrement> {
 
         private int actual;
 
@@ -234,10 +244,6 @@ final class SimpleElements implements Table.Elements {
 
         public int getActual() {
             return actual;
-        }
-
-        public boolean needDecrement(int index) {
-            return index > 0 && index < getActual();
         }
 
         public void decrement() {
@@ -251,8 +257,8 @@ final class SimpleElements implements Table.Elements {
         }
 
         @Override
-        public int compareTo(@NotNull Integer index) {
-            return Integer.compare(getActual(), index);
+        public int compareTo(@NotNull AutoIncrement o) {
+            return Integer.compare(getActual(), o.getActual());
         }
 
         @Override

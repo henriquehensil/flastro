@@ -37,12 +37,12 @@ final class SimpleColumns implements Table.Columns {
     @Override
     public @NotNull <E> Column<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnAlreadyExistsException, NoEmptyTableException {
         synchronized (lock) {
-            if (table.getElements().getAll().isEmpty()) {
+            if (!table.getElements().getAll().isEmpty()) {
                 throw new NoEmptyTableException("Cannot create new Key columns because table has elements");
             } else if (get(name).isPresent()) {
                 throw new ColumnAlreadyExistsException(get(name).get());
             } else {
-                final @NotNull SimpleColumn<E> column = new SimpleColumn<>(dataType, name);
+                final @NotNull Column<E> column = new SimpleColumn<>(dataType, name);
                 columns.add(column);
                 getTable().getElements().upgrade(column);
                 return column;
@@ -55,23 +55,27 @@ final class SimpleColumns implements Table.Columns {
         synchronized (lock) {
             if (get(name).isPresent()) {
                 throw new ColumnAlreadyExistsException(get(name).get());
+            } else {
+                final @NotNull Column<E> column = new SimpleColumn<>(dataType, name, isNullable, defaultValue);
+                columns.add(column);
+                getTable().getElements().upgrade(column);
+                return column;
             }
-
-            final @NotNull SimpleColumn<E> column = new SimpleColumn<>(dataType, name, isNullable, defaultValue);
-            columns.add(column);
-            getTable().getElements().upgrade(column);
-            return column;
         }
     }
 
     @Override
     public @NotNull Optional<@NotNull Column<?>> get(@NotNull String columnName) {
-        return columns.stream().filter(col -> col.getName().equalsIgnoreCase(columnName)).findFirst();
+        synchronized (lock)  {
+            return columns.stream().filter(col -> col.getName().equalsIgnoreCase(columnName)).findFirst();
+        }
     }
 
     @Override
     public boolean delete(@NotNull String columnName) {
-        synchronized (lock) {
+        if (columns.size() == 1) {
+            return false;
+        } else synchronized (lock) {
             @Nullable Column<?> column = get(columnName).orElse(null);
             if (column == null) return false;
             columns.remove(column);
@@ -120,7 +124,7 @@ final class SimpleColumns implements Table.Columns {
         ) {
             this.name = name;
             this.dataType = dataType;
-            this.key = true;
+            this.key = false;
             this.nullable = isNullable;
             this.value = value;
         }
@@ -162,26 +166,29 @@ final class SimpleColumns implements Table.Columns {
 
         @Override
         public int compareTo(@NotNull Column<?> col) {
-            if (this.isKey()) return col.isKey() ? 0 : -1;
-            else if (this.isNullable()) return col.isNullable() ? 0 : 1;
-            else return 0;
+            if (key) return !col.isKey() ? -1 : name.compareTo(col.getName());
+            else if (nullable) return !col.isNullable() ? 1 : name.compareTo(col.getName());
+            else if (col.isKey()) return 1;
+            else if (col.isNullable()) return -1;
+            else return name.compareTo(col.getName());
         }
 
         @Override
         public boolean equals(@Nullable Object obj) {
             if (obj instanceof Column<?>) {
                 @NotNull Column<?> column = (Column<?>) obj;
-                return
-                        this.getName().equalsIgnoreCase(column.getName()) &&
-                                this.isKey() && column.isKey() &&
-                                this.isNullable() && column.isNullable();
+                return Objects.equals(getTable(), column.getTable()) &&
+                        Objects.equals(dataType.getType(), column.getDataType().getType()) &&
+                        Objects.equals(name.toLowerCase(), column.getName().toLowerCase()) &&
+                        Objects.equals(key, column.isKey()) &&
+                        Objects.equals(nullable, column.isNullable());
             }
             return false;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(getName(), isKey(), isNullable());
+            return Objects.hash(getTable(), getName().toLowerCase(), isKey(), isNullable());
         }
     }
 }

@@ -1,8 +1,7 @@
 package codes.shawlas.data.table;
 
 import codes.shawlas.data.DataType;
-import codes.shawlas.data.exception.column.ColumnAlreadyExistsException;
-import codes.shawlas.data.exception.column.ColumnException;
+import codes.shawlas.data.exception.column.*;
 import codes.shawlas.data.exception.table.NoEmptyTableException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,9 +27,14 @@ public interface Table {
         @NotNull Table getTable();
 
         /**
-         * @throws ColumnException if any column errors occurs
+         * @throws NoColumnsException if not have any columns
+         * @throws DuplicatedColumnException when {@code entryData} has duplicated columns
+         * @throws MissingKeyColumnException if at least 1 key column is not specified
+         * @throws InvalidColumnException when {@code entryData} has Columns that not present in this table
+         * @throws DuplicatedKeyValueException when some key column value is already defined in another element
          * */
-        @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData) throws ColumnException;
+        @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData)
+                throws NoColumnsException, DuplicatedColumnException, MissingKeyColumnException, InvalidColumnException, DuplicatedKeyValueException;
 
         @NotNull Optional<? extends @NotNull Element> get(int index);
 
@@ -44,7 +48,7 @@ public interface Table {
         @NotNull Table getTable();
 
         /**
-         * @return A Column key created
+         * @return A key column created
          * @throws NoEmptyTableException if you have an element in the table, you can't create a column key
          * @throws ColumnAlreadyExistsException if column {@code name} already exists
          * */

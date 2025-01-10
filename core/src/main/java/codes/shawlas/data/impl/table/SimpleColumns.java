@@ -72,12 +72,15 @@ final class SimpleColumns implements Table.Columns {
     }
 
     @Override
-    public boolean delete(@NotNull String columnName) {
-        if (columns.size() == 1) {
-            return false;
-        } else synchronized (lock) {
+    public boolean delete(@NotNull String columnName) throws NoEmptyTableException {
+        synchronized (lock) {
             @Nullable Column<?> column = get(columnName).orElse(null);
-            if (column == null) return false;
+            if (column == null) {
+                return false;
+            } else if (columns.size() == 1 && !table.getElements().getAll().isEmpty()) {
+                throw new NoEmptyTableException("Cannot delete the last column when has elements");
+            }
+
             columns.remove(column);
             getTable().getElements().upgrade(column);
             return true;

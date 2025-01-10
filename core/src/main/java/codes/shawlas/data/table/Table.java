@@ -62,7 +62,10 @@ public interface Table {
 
         @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String columnName);
 
-        boolean delete(@NotNull String columnName);
+        /**
+         * @throws NoEmptyTableException when has
+         * */
+        boolean delete(@NotNull String columnName) throws NoEmptyTableException;
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getAll();
 

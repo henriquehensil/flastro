@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileAlreadyExistsException;
+import codes.shawlas.data.exception.file.FileAlreadyExistsException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
@@ -49,7 +49,6 @@ public interface FileStorage {
 
         @NotNull Optional<? extends @NotNull MetaFile> get(@NotNull Path path);
 
-        @Unmodifiable
-        @NotNull Collection<? extends @NotNull MetaFile> toCollection();
+        @Unmodifiable @NotNull Collection<? extends @NotNull MetaFile> toCollection();
     }
 }

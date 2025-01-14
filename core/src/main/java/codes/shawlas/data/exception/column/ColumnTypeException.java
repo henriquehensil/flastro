@@ -10,10 +10,6 @@ import org.jetbrains.annotations.Nullable;
  * If is not nullable, a null value is not accept</P>
  * */
 public class ColumnTypeException extends ColumnException {
-    public ColumnTypeException(@NotNull Column<?> column, @Nullable Object value) {
-        super("Cannot accept the value: '" + value + "'because the column " + (column.isKey() ? "is key" : "not accept null values"));
-    }
-
     public ColumnTypeException(@NotNull String message) {
         super(message);
     }

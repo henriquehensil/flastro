@@ -26,9 +26,7 @@ public interface Element {
      * */
     <E> void setValue(@NotNull Column<E> column, @Nullable E value) throws ColumnException;
 
-    default boolean containsValue(@Nullable Object value) {
-        return getData().stream().anyMatch(data -> Objects.equals(data.getValue(), value));
-    }
+    boolean containsValue(@Nullable Object value);
 
     @Unmodifiable @NotNull Collection<@NotNull EntryData<?>> getData();
 }

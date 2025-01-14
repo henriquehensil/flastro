@@ -10,9 +10,6 @@
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
-        <module>message</module>
-        <module>commons</module>
-        <module>client</module>
     </modules>
 
     <dependencies>

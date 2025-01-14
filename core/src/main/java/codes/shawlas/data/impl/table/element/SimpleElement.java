@@ -11,8 +11,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiConsumer;
@@ -22,34 +20,20 @@ import java.util.stream.Collectors;
 
 final class SimpleElement implements Element {
 
-    private final @NotNull Table table;
     private @Range(from = 1, to = Long.MAX_VALUE) int index;
-
     private final @NotNull ElementValues values = new ElementValues();
+    private final @NotNull Table table;
     private final @NotNull ReentrantLock lock;
 
-    SimpleElement(@NotNull Table table, int index) {
-        if (!table.getClass().getName().equalsIgnoreCase("codes.shawlas.data.impl.table.SimpleTable")) {
-            throw new RuntimeException("This class don't accept another implementation table class: " + table.getClass());
-        } else if (index <= 0) {
-            throw new RuntimeException("Invalid index");
-        } else if (index > table.getElements().getAll().size()) {
-            throw new RuntimeException("the new Element cannot be equals or less that total elements in the table");
-        }
-
-        @Nullable ReentrantLock lock = null;
-
-        for (@NotNull Method method : table.getClass().getMethods()) {
-            if (Modifier.isPrivate(method.getModifiers()) && method.getName().equals("getLock")) {
-                lock = (ReentrantLock) method.getDefaultValue();
-            }
-        }
-
-        if (lock == null) throw new RuntimeException("Cannot find the table global lock");
-
-        this.table = table;
+    SimpleElement(@NotNull SimpleElements elements, int index) {
+        if (index <= 0) throw new IllegalArgumentException("Invalid index");
+        this.table = elements.getTable();
         this.index = index;
-        this.lock = lock;
+        this.lock = elements.getLock();
+
+        for (@NotNull Column<?> c : elements.getTable().getColumns().getAll()) {
+            values.put(c, c.getDefault());
+        }
     }
 
     @NotNull Map<@NotNull Column<?>, @Nullable Object> getValues() {
@@ -57,7 +41,13 @@ final class SimpleElement implements Element {
     }
 
     @Unmodifiable @NotNull Set<@NotNull EntryData<?>> getKeyData() {
-        return getData().stream().filter(data -> data.getColumn().isKey()).collect(Collectors.toSet());
+        lock.lock();
+        try {
+            ((SimpleElements) table.getElements()).upgrade(this);
+            return getData().stream().filter(data -> data.getColumn().isKey()).collect(Collectors.toSet());
+        } finally {
+            lock.unlock();
+        }
     }
 
     boolean keysContainsValue(@Nullable Object value) {
@@ -65,7 +55,12 @@ final class SimpleElement implements Element {
     }
 
     void decrement() {
-        index--;
+        lock.lock();
+        try {
+            index--;
+        } finally {
+            lock.unlock();
+        }
     }
 
     // Implementations
@@ -77,19 +72,27 @@ final class SimpleElement implements Element {
 
     @Override
     public @Range(from = 0, to = Long.MAX_VALUE) int getIndex() {
-        return index;
+        lock.lock();
+        try {
+            return index;
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public <E> @Nullable E getValue(@NotNull Column<E> column) throws InvalidColumnException {
         lock.lock();
         try {
+            ((SimpleElements) table.getElements()).upgrade(this);
+
             if (!values.containsKey(column)) {
                 throw new InvalidColumnException(column);
-            } else {
-                //noinspection unchecked
-                return (E) values.get(column);
             }
+
+            //noinspection unchecked
+            return (E) values.get(column);
+
         } finally {
             lock.unlock();
         }
@@ -103,6 +106,8 @@ final class SimpleElement implements Element {
     public <E> void setValue(@NotNull Column<E> column, @Nullable E value) throws InvalidColumnException, ColumnTypeException {
         lock.lock();
         try {
+            ((SimpleElements) table.getElements()).upgrade(this);
+
             if (!values.containsKey(column)) {
                 throw new InvalidColumnException(column);
             } else try {
@@ -110,6 +115,7 @@ final class SimpleElement implements Element {
             } catch (IllegalArgumentException e) {
                 throw new ColumnTypeException(e.getMessage());
             }
+
         } finally {
             lock.unlock();
         }
@@ -117,60 +123,108 @@ final class SimpleElement implements Element {
 
     @Override
     public @Unmodifiable @NotNull Set<@NotNull EntryData<?>> getData() {
-        @NotNull Set<@NotNull EntryData<?>> data = new HashSet<>();
-        // noinspection unchecked
-        values.forEach((key, value) -> data.add(new EntryData<>((Column<Object>) key, value)));
-        return Collections.unmodifiableSet(data);
+        lock.lock();
+        try {
+            ((SimpleElements) table.getElements()).upgrade(this);
+
+            @NotNull Set<@NotNull EntryData<?>> data = new HashSet<>();
+
+            for (@NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> e : values.entrySet()) {
+                // noinspection unchecked
+                data.add(new EntryData<>((Column<Object>) e.getKey(), e.getValue()));
+            }
+
+            return Collections.unmodifiableSet(data);
+
+        } finally {
+            lock.unlock();
+        }
+
+    }
+
+    @Override
+    public boolean containsValue(@Nullable Object value) {
+        lock.lock();
+        try {
+            ((SimpleElements) table.getElements()).upgrade(this);
+
+            for (@NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> e : values.entrySet()) {
+                if (Objects.equals(e.getValue(), value)) {
+                    return true;
+                }
+            }
+            return false;
+
+        } finally {
+            lock.unlock();
+        }
     }
 
     @Override
     public boolean equals(@Nullable Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         final @NotNull SimpleElement that = (SimpleElement) o;
+        ((SimpleElements) table.getElements()).upgrade(this);
         return Objects.equals(values, that.values);
     }
 
     @Override
     public int hashCode() {
+        ((SimpleElements) table.getElements()).upgrade(this);
         return Objects.hashCode(values);
     }
 
     // Classes
 
-    private final class ElementValues extends TreeMap<@NotNull Column<?>, @Nullable Object> {
+    private final class ElementValues implements Map<@NotNull Column<?>, @Nullable Object> {
+
+        private final @NotNull Map<@NotNull Column<?>, @Nullable Object> values;
 
         private ElementValues() {
-            super(Comparator.naturalOrder());
+            this.values = new TreeMap<>(Comparator.naturalOrder());
         }
 
         @Override
-        public @Nullable Column<?> put(@NotNull Column<?> column, @Nullable Object value) {
+        public @Nullable Object put(@NotNull Column<?> column, @Nullable Object value) {
             validate(column, value);
 
             lock.lock();
             try {
-                return (Column<?>) super.put(column, value);
+                return this.values.put(column, value);
             } finally {
                 lock.unlock();
             }
         }
 
         @Override
-        public @Nullable Column<?> replace(@NotNull Column<?> column, @Nullable Object value) {
+        public @Nullable Object replace(@NotNull Column<?> column, @Nullable Object value) {
             validate(column, value);
+
             lock.lock();
             try {
-                return (Column<?>) super.replace(column, value);
+                return this.values.replace(column, value);
             } finally {
                 lock.unlock();
             }
         }
 
         private void validate(@NotNull Column<?> column, @Nullable Object value) throws IllegalArgumentException, ClassCastException {
-            if ((!column.isNullable() || column.isKey()) && value == null) {
-                throw new IllegalArgumentException("This column is " + (column.isKey() ? "key " : "not nullable ") + "and cannot represent a null value");
+            if ((!column.isNullable() && !column.isKey()) && value == null) {
+                throw new IllegalArgumentException("This column is not nullable and cannot represent a null value: " + column);
             } else if (value != null && !Objects.equals(value.getClass(), column.getDataType().getType())) {
                 throw new ClassCastException("The class type of the value '" + value + "' is different from the column");
+            }
+        }
+
+        @Override
+        public @Nullable Object remove(@NotNull Object o) {
+            if (!isColumn(o)) throw new ClassCastException("the key is of an inappropriate type for this map");
+
+            lock.lock();
+            try {
+                return values.remove(o);
+            } finally {
+                lock.unlock();
             }
         }
 
@@ -178,67 +232,7 @@ final class SimpleElement implements Element {
         public int size() {
             lock.lock();
             try {
-                return super.size();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public boolean containsKey(Object key) {
-            lock.lock();
-            try {
-                return super.containsKey(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public boolean containsValue(Object value) {
-            lock.lock();
-            try {
-                return super.containsValue(value);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @Nullable Column<?> get(Object key) {
-            lock.lock();
-            try {
-                return (Column<?>) super.get(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Comparator<? super @NotNull Column<?>> comparator() {
-            lock.lock();
-            try {
-                return super.comparator();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Column<?> firstKey() {
-            lock.lock();
-            try {
-                return super.firstKey();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Column<?> lastKey() {
-            lock.lock();
-            try {
-                return super.lastKey();
+                return values.size();
             } finally {
                 lock.unlock();
             }
@@ -248,8 +242,8 @@ final class SimpleElement implements Element {
         public void putAll(@NotNull Map<? extends @NotNull Column<?>, ?> values) {
             lock.lock();
             try {
-                for(@NotNull Map.Entry<? extends @NotNull Column<?>, ?> entry : values.entrySet()) {
-                    this.put(entry.getKey(), entry.getValue());
+                for (@NotNull Entry<? extends @NotNull Column<?>, ?> e : values.entrySet()) {
+                    this.put(e.getKey(), e.getValue());
                 }
             } finally {
                 lock.unlock();
@@ -257,165 +251,10 @@ final class SimpleElement implements Element {
         }
 
         @Override
-        public @Nullable Object remove(Object key) {
-            lock.lock();
-            try {
-                return super.remove(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public Object clone() {
-            return super.clone();
-        }
-
-        @Override
         public @NotNull Set<@NotNull Column<?>> keySet() {
             lock.lock();
             try {
-                return super.keySet();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> firstEntry() {
-            lock.lock();
-            try {
-                return super.firstEntry();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> lastEntry() {
-            lock.lock();
-            try {
-                return super.lastEntry();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> pollFirstEntry() {
-            lock.lock();
-            try {
-                return super.pollFirstEntry();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> pollLastEntry() {
-            lock.lock();
-            try {
-                return super.pollLastEntry();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> lowerEntry(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.lowerEntry(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Column<?> lowerKey(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.lowerKey(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> floorEntry(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.floorEntry(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Column<?> floorKey(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.floorKey(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> ceilingEntry(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.ceilingEntry(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Column<?> ceilingKey(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.ceilingKey(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Map.Entry<@NotNull Column<?>, @Nullable Object> higherEntry(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.higherEntry(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull Column<?> higherKey(@NotNull Column<?> key) {
-            lock.lock();
-            try {
-                return super.higherKey(key);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull NavigableSet<@NotNull Column<?>> navigableKeySet() {
-            lock.lock();
-            try {
-                return super.navigableKeySet();
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        @Override
-        public @NotNull NavigableSet<@NotNull Column<?>> descendingKeySet() {
-            lock.lock();
-            try {
-                return super.descendingKeySet();
+                return this.values.keySet();
             } finally {
                 lock.unlock();
             }
@@ -425,137 +264,132 @@ final class SimpleElement implements Element {
         public @NotNull Collection<@Nullable Object> values() {
             lock.lock();
             try {
-                return super.values();
+                return this.values.values();
             } finally {
                 lock.unlock();
             }
         }
 
         @Override
-        public @NotNull Set<Map.Entry<@NotNull Column<?>, @Nullable Object>> entrySet() {
+        public @NotNull Set<@NotNull Entry<@NotNull Column<?>, @Nullable Object>> entrySet() {
             lock.lock();
             try {
-                return super.entrySet();
+                return this.values.entrySet();
             } finally {
                 lock.unlock();
             }
         }
 
         @Override
-        public @NotNull NavigableMap<@NotNull Column<?>, @Nullable Object> descendingMap() {
+        public boolean isEmpty() {
             lock.lock();
             try {
-                return super.descendingMap();
+                return this.values.isEmpty();
             } finally {
                 lock.unlock();
             }
         }
 
         @Override
-        public @NotNull NavigableMap<@NotNull Column<?>, @Nullable Object> subMap(@NotNull Column<?> fromKey, boolean fromInclusive, @NotNull Column<?> toKey, boolean toInclusive) {
+        public boolean containsKey(@NotNull Object o) {
+            if (!isColumn(o)) return false;
+
             lock.lock();
             try {
-                return super.subMap(fromKey, fromInclusive, toKey, toInclusive);
+                return this.values.containsKey(o);
             } finally {
                 lock.unlock();
             }
         }
 
         @Override
-        public @NotNull NavigableMap<@NotNull Column<?>, @Nullable Object> headMap(@NotNull Column<?> toKey, boolean inclusive) {
+        public boolean containsValue(@NotNull Object o) {
             lock.lock();
             try {
-                return super.headMap(toKey, inclusive);
+                return this.values.containsValue(o);
             } finally {
                 lock.unlock();
             }
         }
 
+        private boolean isColumn(@NotNull Object o) {
+            return o instanceof Column<?>;
+        }
+
         @Override
-        public NavigableMap<@NotNull Column<?>, @Nullable Object> tailMap(@NotNull Column<?> fromKey, boolean inclusive) {
+        public @Nullable Object get(@NotNull Object column) {
+            if (!isColumn(column)) return null;
+
             lock.lock();
             try {
-                return super.tailMap(fromKey, inclusive);
+                return this.values.get(column);
             } finally {
                 lock.unlock();
             }
         }
 
         @Override
-        public @NotNull SortedMap<@NotNull Column<?>, @Nullable Object> subMap(@NotNull Column<?> fromKey, @NotNull Column<?> toKey) {
+        public @Nullable Object getOrDefault(@NotNull Object column, @Nullable Object defaultValue) {
+            if (!isColumn(column)) return defaultValue;
+
             lock.lock();
             try {
-                return super.subMap(fromKey, toKey);
+                return this.values.getOrDefault(column, defaultValue);
             } finally {
                 lock.unlock();
             }
         }
 
-        @Override
-        public @NotNull SortedMap<@NotNull Column<?>, @Nullable Object> headMap(@NotNull Column<?> toKey) {
-            lock.lock();
-            try {
-                return super.headMap(toKey);
-            } finally {
-                lock.unlock();
-            }
-        }
+        // Unsupported
 
         @Override
-        public @NotNull SortedMap<@NotNull Column<?>, @Nullable Object> tailMap(@NotNull Column<?> fromKey) {
-            lock.lock();
-            try {
-                return super.tailMap(fromKey);
-            } finally {
-                lock.unlock();
-            }
-        }
-
-        // unsupported
-
-        @Override
-        public boolean replace(@NotNull Column<?> key, @Nullable Object oldValue, @Nullable Object newValue) {
-            throw new UnsupportedOperationException("Cannot use this Operation");
+        public void clear() {
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
 
         @Override
         public void forEach(BiConsumer<? super @NotNull Column<?>, ? super @Nullable Object> action) {
-            super.forEach(action);
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
 
         @Override
         public void replaceAll(BiFunction<? super @NotNull Column<?>, ? super @Nullable Object, ?> function) {
-            throw new UnsupportedOperationException("Cannot use this Operation");
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
 
         @Override
         public @Nullable Object putIfAbsent(@NotNull Column<?> key, @Nullable Object value) {
-            throw new UnsupportedOperationException("Cannot use this Operation");
+            throw new UnsupportedOperationException("Cannot use this operation");
+        }
+
+        @Override
+        public boolean remove(Object key, Object value) {
+            throw new UnsupportedOperationException("Cannot use this operation");
+        }
+
+        @Override
+        public boolean replace(@NotNull Column<?> key, @Nullable Object oldValue, @Nullable Object newValue) {
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
 
         @Override
         public @Nullable Object computeIfAbsent(@NotNull Column<?> key, @NotNull Function<? super @NotNull Column<?>, ?> mappingFunction) {
-            throw new UnsupportedOperationException("Cannot use this Operation");
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
 
         @Override
         public @Nullable Object computeIfPresent(@NotNull Column<?> key, @NotNull BiFunction<? super @NotNull Column<?>, ? super @Nullable Object, ?> remappingFunction) {
-            throw new UnsupportedOperationException("Cannot use this Operation");
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
 
         @Override
         public @Nullable Object compute(@NotNull Column<?> key, @NotNull BiFunction<? super @NotNull Column<?>, ? super @Nullable Object, ?> remappingFunction) {
-            throw new UnsupportedOperationException("Cannot use this Operation");
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
 
         @Override
         public @Nullable Object merge(@NotNull Column<?> key, @Nullable Object value, @NotNull BiFunction<? super @Nullable Object, ? super @Nullable Object, ?> remappingFunction) {
-            throw new UnsupportedOperationException("Cannot use this Operation");
-        }
-
-        @Override
-        public void clear() {
-            throw new UnsupportedOperationException("Cannot use this Operation");
+            throw new UnsupportedOperationException("Cannot use this operation");
         }
     }
 }

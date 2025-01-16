@@ -6,6 +6,8 @@ import org.jetbrains.annotations.Unmodifiable;
 import java.io.File;
 import java.io.IOException;
 import codes.shawlas.data.exception.file.FileAlreadyExistsException;
+
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Optional;
@@ -23,6 +25,7 @@ public interface FileStorage {
         /**
          * Create an empty file
          *
+         * @throws IllegalArgumentException if file {@code name} has an invalid character
          * @throws FileAlreadyExistsException if {@code name} is already in use
          * @throws IOException if an I/O error occurs
          * */
@@ -31,10 +34,11 @@ public interface FileStorage {
         /**
          * Create an empty file into directory
          *
+         * @throws InvalidPathException if the path with {@code directories} and file {@code name} result as invalid path
          * @throws FileAlreadyExistsException if {@code name} is already in use in the directory
          * @throws IOException if an I/O error occurs
          * */
-        @NotNull MetaFile create(@NotNull String directory, @NotNull String name) throws FileAlreadyExistsException, IOException;
+        @NotNull MetaFile create(@NotNull String directories, @NotNull String name) throws FileAlreadyExistsException, IOException, InvalidPathException;
 
         /**
          * Stores an uploaded file

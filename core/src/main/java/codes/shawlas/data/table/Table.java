@@ -36,9 +36,9 @@ public interface Table {
         @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData)
                 throws NoColumnsException, DuplicatedColumnException, MissingKeyColumnException, InvalidColumnException, DuplicatedKeyValueException;
 
-        @NotNull Optional<? extends @NotNull Element> get(int index);
+        @NotNull Optional<? extends @NotNull Element> get(int row);
 
-        boolean delete(int index);
+        boolean delete(int row);
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Element> getAll();
     }

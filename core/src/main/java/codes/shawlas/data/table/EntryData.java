@@ -6,18 +6,29 @@ import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.AbstractMap;
 import java.util.Map.Entry;
-import java.util.Objects;
 
 public class EntryData<T> {
 
     private final @NotNull Entry<@NotNull Column<T>, @Nullable T> entry;
 
     public EntryData(@NotNull Entry<@NotNull Column<T>, @Nullable T> entry) {
-        this.entry = entry;
+        if (entry.getKey().isKey() && entry.getValue() == null) {
+            throw new IllegalArgumentException("Column is key but the value is null");
+        } else if (!entry.getKey().isNullable() && entry.getValue() == null) {
+            throw new IllegalArgumentException("Column is not nullable but the value is null");
+        }
+
+        this.entry = new AbstractMap.SimpleImmutableEntry<>(entry);
     }
 
     public EntryData(@NotNull Column<T> column, @Nullable T value) {
-        this.entry = new AbstractMap.SimpleEntry<>(column, value);
+        if (column.isKey() && value == null) {
+            throw new IllegalArgumentException("Column is key but the value is null");
+        } else if (!column.isNullable() && value == null) {
+            throw new IllegalArgumentException("Column is not nullable but the value is null");
+        }
+
+        this.entry = new AbstractMap.SimpleImmutableEntry<>(column, value);
     }
 
     // Getters
@@ -31,20 +42,6 @@ public class EntryData<T> {
     }
 
     public @Unmodifiable @NotNull Entry<@NotNull Column<T>, @Nullable T> toImutableEntry() {
-        return new AbstractMap.SimpleImmutableEntry<>(entry);
-    }
-
-    // Native
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
-        final EntryData<?> entryData = (EntryData<?>) o;
-        return Objects.equals(getColumn(), entryData.getColumn()) && Objects.equals(getValue(), entryData.getValue());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getColumn(), getValue());
+        return entry;
     }
 }

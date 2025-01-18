@@ -1,54 +1,27 @@
 package codes.shawlas.data;
 
+import codes.shawlas.data.file.FileStorage;
 import codes.shawlas.data.table.TableStorage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 
 public interface Database {
-
-    // Static Initializers
-
-    static @NotNull Database create(@NotNull Authentication authentication) {
-        try {
-            // noinspection unchecked
-            @NotNull Class<? extends TableStorage> tableStorage = (Class<? extends TableStorage>) Class.forName("codes.shawlas.data.impl.table.SimpleTableStorage");
-            @NotNull Constructor<? extends TableStorage> tsConstructor = tableStorage.getDeclaredConstructor();
-            tsConstructor.setAccessible(true);
-
-            // Todo: NestStorage and FileStorage
-            @NotNull TableStorage ts = tsConstructor.newInstance();
-
-            // Instantiation
-            return new Database() {
-                @Override
-                public @NotNull Authentication getAuthentication() {
-                    return authentication;
-                }
-
-                @Override
-                public @NotNull TableStorage getTableStorage() {
-                    return ts;
-                }
-            };
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Cannot find the implementation class", e);
-        } catch (NoSuchMethodException e) {
-            throw new RuntimeException("Cannot instantiate the constructor of implementation class", e);
-        } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-            throw new RuntimeException("Cannot instantiate the implementation class", e);
-        }
-    }
 
     // Objects
 
     @NotNull Authentication getAuthentication();
 
     @NotNull TableStorage getTableStorage();
+
+    @NotNull FileStorage getFileStorage();
+
+    boolean start() throws IOException;
+
+    boolean stop() throws IOException;
 
     // Classes
 

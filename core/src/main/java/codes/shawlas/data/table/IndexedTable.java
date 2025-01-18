@@ -1,10 +1,11 @@
 package codes.shawlas.data.table;
 
-import codes.shawlas.data.exception.column.ColumnTypeException;
-import codes.shawlas.data.exception.column.InvalidColumnException;
+import codes.shawlas.data.exception.table.column.ColumnTypeException;
+import codes.shawlas.data.exception.table.column.InvalidColumnException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -29,11 +30,25 @@ public interface IndexedTable extends Table {
 
         /**
          * @throws InvalidColumnException if {@code data#getColumn} does not exists in this table
+         * */
+        @NotNull Collection<? extends @NotNull Element> getFiltered(@NotNull EntryData<?> value) throws InvalidColumnException;
+
+        /**
+         * @throws InvalidColumnException if {@code data#getColumn} does not exists in this table
          * @throws ColumnTypeException if {@code data#getColumn} is not a key
          * */
         @NotNull Optional<? extends @NotNull Element> getUnique(@NotNull EntryData<?> data) throws InvalidColumnException, ColumnTypeException;
 
-        @NotNull Collection<? extends @NotNull Element> filter(@NotNull EntryData<?> value) throws InvalidColumnException;
+        /**
+         * @throws InvalidColumnException if {@code data#getColumn} does not exists in this table
+         * */
+        boolean deleteFiltered(@NotNull EntryData<?> data) throws InvalidColumnException;
+
+        /**
+         * @throws InvalidColumnException if {@code data#getColumn} does not exists in this table
+         * @throws ColumnTypeException if {@code data#getColumn} is not a key
+         * */
+        boolean deleteUnique(@NotNull EntryData<?> data) throws ColumnTypeException, InvalidColumnException;
 
     }
 
@@ -49,13 +64,11 @@ public interface IndexedTable extends Table {
 
         @NotNull IndexedTable getTable();
 
-        boolean index(@NotNull Column<?> column) throws InvalidColumnException ;
+        boolean add(@NotNull Column<?> column) throws InvalidColumnException ;
 
         boolean stop(@NotNull Column<?> column) throws InvalidColumnException;
 
         boolean delete(@NotNull Column<?> column) throws InvalidColumnException;
-
-        boolean isIndexed(@NotNull Column<?> column) throws InvalidColumnException;
 
     }
 }

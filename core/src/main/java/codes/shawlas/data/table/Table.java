@@ -1,18 +1,19 @@
 package codes.shawlas.data.table;
 
 import codes.shawlas.data.DataType;
-import codes.shawlas.data.exception.column.*;
 import codes.shawlas.data.exception.table.NoEmptyTableException;
+import codes.shawlas.data.exception.table.column.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public interface Table {
+public interface Table extends Serializable {
 
     @NotNull String getName();
 
@@ -22,7 +23,7 @@ public interface Table {
 
     // Classes
 
-    interface Elements {
+    interface Elements extends Serializable {
 
         @NotNull Table getTable();
 
@@ -43,7 +44,7 @@ public interface Table {
         @Unmodifiable @NotNull Collection<? extends @NotNull Element> getAll();
     }
 
-    interface Columns {
+    interface Columns extends Serializable {
 
         @NotNull Table getTable();
 

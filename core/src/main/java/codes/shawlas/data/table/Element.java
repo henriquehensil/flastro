@@ -1,16 +1,16 @@
 package codes.shawlas.data.table;
 
-import codes.shawlas.data.exception.column.ColumnException;
-import codes.shawlas.data.exception.column.InvalidColumnException;
+import codes.shawlas.data.exception.table.column.ColumnException;
+import codes.shawlas.data.exception.table.column.InvalidColumnException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 import org.jetbrains.annotations.Unmodifiable;
 
+import java.io.Serializable;
 import java.util.Collection;
-import java.util.Objects;
 
-public interface Element {
+public interface Element extends Serializable {
 
     @NotNull Table getTable();
 

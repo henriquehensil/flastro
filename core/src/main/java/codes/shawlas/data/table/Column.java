@@ -4,7 +4,9 @@ import codes.shawlas.data.DataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public interface Column<T> extends Comparable<@NotNull Column<?>> {
+import java.io.Serializable;
+
+public interface Column<T> extends Comparable<@NotNull Column<?>>, Serializable {
 
     @NotNull Table getTable();
 

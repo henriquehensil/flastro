@@ -1,8 +1,6 @@
-package codes.shawlas.data.exception.column;
+package codes.shawlas.data.exception.table.column;
 
-import codes.shawlas.data.table.Column;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * indicates that column does not accept the informed value due to the attribute type

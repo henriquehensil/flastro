@@ -1,6 +1,6 @@
 package codes.shawlas.data.exception.table.column;
 
-import codes.shawlas.data.table.Column;
+import codes.shawlas.data.table.standard.Column;
 import org.jetbrains.annotations.NotNull;
 
 /**

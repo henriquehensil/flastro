@@ -6,9 +6,11 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 
-public interface Column<T> extends Comparable<@NotNull Column<?>>, Serializable {
+public interface Column<T> extends Serializable, Comparable<@NotNull Column<?>> {
 
     @NotNull Table getTable();
+
+    @NotNull String getId();
 
     @NotNull String getName();
 

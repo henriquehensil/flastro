@@ -14,7 +14,7 @@ public interface Element extends Serializable {
 
     @NotNull Table getTable();
 
-    @Range(from = 0, to = Long.MAX_VALUE) int getIndex();
+    @Range(from = 0, to = Long.MAX_VALUE) int getRow();
 
     /**
      * @throws InvalidColumnException if {@code column} does not exists

@@ -4,7 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 
-public interface DataType<T> {
+public interface DataType<T> extends Serializable {
 
     @NotNull DataType<File> FILE = new DataType<File>() {
         @Override

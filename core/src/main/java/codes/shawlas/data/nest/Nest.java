@@ -31,7 +31,7 @@ public interface Nest<T> {
          * */
         <E> @NotNull Nest<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NestAlreadyExistsException;
 
-        @NotNull Optional<@NotNull Nest<?>> get(@NotNull String id);
+        @NotNull Optional<@NotNull Nest<?>> get(@NotNull String nest);
 
         @NotNull Collection<? extends @NotNull Nest<?>> getAll();
 

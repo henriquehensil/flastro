@@ -22,7 +22,11 @@ public interface ShardedTable extends Table {
 
     @NotNull Database getDatabase();
 
+    @Override
     @NotNull ShardedElements getElements();
+
+    @Override
+    @NotNull ShardedColumns getColumns();
 
     @NotNull Shards getShards();
 

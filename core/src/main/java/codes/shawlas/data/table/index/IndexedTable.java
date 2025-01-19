@@ -26,6 +26,8 @@ public interface IndexedTable extends Table {
     @Override
     @NotNull IndexedColumns getColumns();
 
+    @NotNull Indexes getIndexes();
+
     // Classes
 
     interface IndexedElements extends Elements {

@@ -1,11 +1,15 @@
-package codes.shawlas.data.table;
+package codes.shawlas.data.table.index;
 
+import codes.shawlas.data.exception.table.column.ColumnAlreadyIndexedException;
 import codes.shawlas.data.exception.table.column.ColumnTypeException;
 import codes.shawlas.data.exception.table.column.InvalidColumnException;
+import codes.shawlas.data.table.standard.Column;
+import codes.shawlas.data.table.standard.Element;
+import codes.shawlas.data.table.EntryData;
+import codes.shawlas.data.table.standard.Table;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -40,6 +44,8 @@ public interface IndexedTable extends Table {
         @NotNull Optional<? extends @NotNull Element> getUnique(@NotNull EntryData<?> data) throws InvalidColumnException, ColumnTypeException;
 
         /**
+         * Delete all elements that contains the value
+         *
          * @throws InvalidColumnException if {@code data#getColumn} does not exists in this table
          * */
         boolean deleteFiltered(@NotNull EntryData<?> data) throws InvalidColumnException;
@@ -64,11 +70,11 @@ public interface IndexedTable extends Table {
 
         @NotNull IndexedTable getTable();
 
-        boolean add(@NotNull Column<?> column) throws InvalidColumnException ;
+        @NotNull Index create(@NotNull Column<?> column) throws InvalidColumnException, ColumnAlreadyIndexedException;
 
-        boolean stop(@NotNull Column<?> column) throws InvalidColumnException;
+        boolean delete(@NotNull Column<?> column);
 
-        boolean delete(@NotNull Column<?> column) throws InvalidColumnException;
+        @NotNull Collection<? extends @NotNull Index> getAll();
 
     }
 }

@@ -1,19 +1,19 @@
-package codes.shawlas.data.table;
+package codes.shawlas.data.table.standard;
 
 import codes.shawlas.data.DataType;
 import codes.shawlas.data.exception.table.NoEmptyTableException;
 import codes.shawlas.data.exception.table.column.*;
+import codes.shawlas.data.table.EntryData;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.io.Serializable;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public interface Table extends Serializable {
+public interface Table {
 
     @NotNull String getName();
 
@@ -34,14 +34,18 @@ public interface Table extends Serializable {
          * @throws InvalidColumnException when {@code entryData} has Columns that not present in this table
          * @throws DuplicatedKeyValueException when some key column value is already defined in another element
          * */
-        @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData)
-                throws NoColumnsException, DuplicatedColumnException, MissingKeyColumnException, InvalidColumnException, DuplicatedKeyValueException;
+        @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData) throws NoColumnsException, DuplicatedColumnException, MissingKeyColumnException, InvalidColumnException, DuplicatedKeyValueException;
 
         @NotNull Optional<? extends @NotNull Element> get(int row);
 
+        @NotNull Optional<? extends @NotNull Element> get(@NotNull String id);
+
         boolean delete(int row);
 
+        boolean delete(@NotNull String id);
+
         @Unmodifiable @NotNull Collection<? extends @NotNull Element> getAll();
+
     }
 
     interface Columns extends Serializable {
@@ -61,17 +65,18 @@ public interface Table extends Serializable {
          * */
         <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E defaultValue, boolean isNullable) throws ColumnException;
 
-        @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String columnName);
+        @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String column);
 
-        /**
-         * @throws NoEmptyTableException when has
-         * */
-        boolean delete(@NotNull String columnName) throws NoEmptyTableException;
+        boolean delete(@NotNull String column);
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getAll();
 
         default @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getKeys() {
-            return Collections.unmodifiableCollection(getAll().stream().filter(Column::isKey).collect(Collectors.toList()));
+            return getAll().stream().filter(Column::isKey).collect(Collectors.toList());
+        }
+
+        default @Unmodifiable @NotNull Collection<? extends @NotNull Column<?>> getNullable() {
+            return getAll().stream().filter(Column::isNullable).collect(Collectors.toList());
         }
     }
 }

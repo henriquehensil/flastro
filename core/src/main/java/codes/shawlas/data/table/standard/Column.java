@@ -1,12 +1,10 @@
-package codes.shawlas.data.table;
+package codes.shawlas.data.table.standard;
 
 import codes.shawlas.data.DataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Serializable;
-
-public interface Column<T> extends Serializable, Comparable<@NotNull Column<?>> {
+public interface Column<T> extends Comparable<@NotNull Column<?>> {
 
     @NotNull Table getTable();
 

@@ -9,15 +9,16 @@ import java.io.IOException;
 
 public interface Database extends Closeable {
 
-    // Objects
-
     @NotNull Authentication getAuthentication();
 
     @NotNull TableStorage getTableStorage();
 
     @NotNull FileStorage getFileStorage();
 
-    boolean open() throws IOException;
+    void open() throws IOException;
+
+    @Override
+    void close() throws IOException;
 
     boolean isClosed();
 

@@ -1,6 +1,7 @@
 package codes.shawlas.data.table;
 
 import codes.shawlas.data.exception.table.TableAlreadyExistsException;
+import codes.shawlas.data.table.standard.Table;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;

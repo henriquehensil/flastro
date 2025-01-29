@@ -3,44 +3,18 @@ package codes.shawlas.data.connection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 public interface Authentication {
 
     // Static initializers
 
-    static @NotNull Authentication create(@NotNull SocketAddress address, int port, @NotNull String username, @NotNull String password) {
-        if (port < 0) throw new IllegalArgumentException("Invalid port value");
-
-        return new Authentication() {
-            @Override
-            public @NotNull SocketAddress getAddress() {
-                return address;
-            }
-
-            @Override
-            public @Range(from = 0, to = 65535) int getPort() {
-                return port;
-            }
-
-            @Override
-            public @NotNull String getUsername() {
-                return username;
-            }
-
-            @Override
-            public @NotNull String getPassword() {
-                return password;
-            }
-        };
-    }
-
     static @NotNull Authentication create(@NotNull InetSocketAddress address, @NotNull String username, @NotNull String password) {
         return new Authentication() {
             @Override
-            public @NotNull SocketAddress getAddress() {
-                return address;
+            public @NotNull InetAddress getAddress() {
+                return address.getAddress();
             }
 
             @Override
@@ -62,7 +36,7 @@ public interface Authentication {
 
     // Objects
 
-    @NotNull SocketAddress getAddress();
+    @NotNull InetAddress getAddress();
 
     @Range(from = 0, to = 65535) int getPort();
 

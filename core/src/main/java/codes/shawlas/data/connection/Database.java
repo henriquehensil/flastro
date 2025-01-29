@@ -7,7 +7,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Closeable;
 import java.io.IOException;
 
-public interface Database extends Closeable {
+public interface Database {
 
     @NotNull Authentication getAuthentication();
 
@@ -15,11 +15,14 @@ public interface Database extends Closeable {
 
     @NotNull FileStorage getFileStorage();
 
-    void open() throws IOException;
+    @NotNull Connection getConnection();
 
-    @Override
-    void close() throws IOException;
+    // Classes
 
-    boolean isClosed();
+    interface Connection extends Closeable {
+
+        void open() throws IOException;
+
+    }
 
 }

@@ -2,6 +2,7 @@ package codes.shawlas.data.table.standard;
 
 import codes.shawlas.data.DataType;
 import codes.shawlas.data.exception.table.NoEmptyTableException;
+import codes.shawlas.data.exception.table.TableException;
 import codes.shawlas.data.exception.table.column.*;
 import codes.shawlas.data.table.EntryData;
 import org.jetbrains.annotations.NotNull;
@@ -14,6 +15,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface Table {
+
+    @NotNull String getId();
 
     @NotNull String getName();
 
@@ -34,7 +37,7 @@ public interface Table {
          * @throws InvalidColumnException when {@code entryData} has Columns that not present in this table
          * @throws DuplicatedKeyValueException when some key column value is already defined in another element
          * */
-        @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData) throws NoColumnsException, DuplicatedColumnException, MissingKeyColumnException, InvalidColumnException, DuplicatedKeyValueException;
+        @NotNull Element create(@NotNull EntryData<?> @NotNull ... entryData) throws ColumnException;
 
         @NotNull Optional<? extends @NotNull Element> get(int row);
 
@@ -57,13 +60,14 @@ public interface Table {
          * @throws NoEmptyTableException if you have an element in the table, you can't create a column key
          * @throws ColumnAlreadyExistsException if column {@code name} already exists
          * */
-        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnAlreadyExistsException, NoEmptyTableException;
+        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws ColumnException, TableException;
 
         /**
          * @return A standard column created
-         * @throws ColumnException if any column errors occurs
+         *
+         * @throws ColumnAlreadyExistsException if column {@code name} already exists
          * */
-        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E defaultValue, boolean isNullable) throws ColumnException;
+        <E> @NotNull Column<E> create(@NotNull String name, @NotNull DataType<E> dataType, @Nullable E defaultValue, boolean isNullable) throws ColumnAlreadyExistsException;
 
         @NotNull Optional<? extends @NotNull Column<?>> get(@NotNull String column);
 

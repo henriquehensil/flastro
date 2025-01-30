@@ -1,11 +1,9 @@
 package codes.shawlas.data.connection;
 
 import codes.shawlas.data.file.FileStorage;
+import codes.shawlas.data.nest.NestStorage;
 import codes.shawlas.data.table.TableStorage;
 import org.jetbrains.annotations.NotNull;
-
-import java.io.Closeable;
-import java.io.IOException;
 
 public interface Database {
 
@@ -15,14 +13,6 @@ public interface Database {
 
     @NotNull FileStorage getFileStorage();
 
-    @NotNull Connection getConnection();
-
-    // Classes
-
-    interface Connection extends Closeable {
-
-        void open() throws IOException;
-
-    }
+    @NotNull NestStorage getNestStorage();
 
 }

@@ -1,7 +1,6 @@
 package codes.shawlas.data.nest;
 
 import codes.shawlas.data.DataType;
-import codes.shawlas.data.exception.nest.NestAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
@@ -18,24 +17,11 @@ public interface Nest<T> {
 
     @NotNull Optional<@NotNull Nest<?>> getFather();
 
-    @NotNull Children getChildren();
+    @NotNull NestStorage.Nests getChildren();
 
     @NotNull Content<T> getContent();
 
     // Classes
-
-    interface Children extends Iterable<@NotNull Nest<?>> {
-
-        /**
-         * @throws NestAlreadyExistsException if the {@code name} is already in use
-         * */
-        <E> @NotNull Nest<E> create(@NotNull String name, @NotNull DataType<E> dataType) throws NestAlreadyExistsException;
-
-        @NotNull Optional<@NotNull Nest<?>> get(@NotNull String nest);
-
-        @NotNull Collection<? extends @NotNull Nest<?>> getAll();
-
-    }
 
     interface Content<T> extends Map<@NotNull String, @Nullable T>, Iterable<@NotNull T> {
 
@@ -100,5 +86,4 @@ public interface Nest<T> {
         @NotNull Set<@NotNull Entry<@NotNull String, @Nullable T>> entrySet();
 
     }
-
 }

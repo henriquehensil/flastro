@@ -1,4 +1,4 @@
-package codes.shawlas.data;
+package codes.shawlas.data.io;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -41,9 +41,6 @@ public interface DataType<T> extends Serializable {
             return File.class;
         }
     };
-
-    // Primitives
-
     @NotNull DataType<String> STRING = new DataType<String>() {
         @Override
         public @NotNull String read(@NotNull InputStream stream) throws IOException {

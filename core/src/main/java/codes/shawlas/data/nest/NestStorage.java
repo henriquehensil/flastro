@@ -1,6 +1,6 @@
 package codes.shawlas.data.nest;
 
-import codes.shawlas.data.DataType;
+import codes.shawlas.data.io.DataType;
 import codes.shawlas.data.exception.nest.NestAlreadyExistsException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;

@@ -1,6 +1,6 @@
 package codes.shawlas.data.table.standard;
 
-import codes.shawlas.data.DataType;
+import codes.shawlas.data.io.DataType;
 import codes.shawlas.data.exception.table.NoEmptyTableException;
 import codes.shawlas.data.exception.table.TableException;
 import codes.shawlas.data.exception.table.column.*;

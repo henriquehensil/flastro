@@ -1,6 +1,6 @@
 package codes.shawlas.data.nest;
 
-import codes.shawlas.data.DataType;
+import codes.shawlas.data.io.DataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;

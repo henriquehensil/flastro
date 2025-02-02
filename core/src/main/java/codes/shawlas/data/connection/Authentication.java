@@ -2,26 +2,30 @@ package codes.shawlas.data.connection;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
+import org.jetbrains.annotations.UnknownNullability;
 
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 
 public interface Authentication {
 
     // Static initializers
 
-    static @NotNull Authentication create(@NotNull SocketAddress address, int port, @NotNull String username, @NotNull String password) {
-        if (port < 0) throw new IllegalArgumentException("Invalid port value");
-
+    static @NotNull Authentication create(@NotNull InetSocketAddress address, @NotNull String username, @NotNull String password) {
         return new Authentication() {
             @Override
-            public @NotNull SocketAddress getAddress() {
-                return address;
+            public @UnknownNullability Object getKey() {
+                return null;
+            }
+
+            @Override
+            public @NotNull InetAddress getAddress() {
+                return address.getAddress();
             }
 
             @Override
             public @Range(from = 0, to = 65535) int getPort() {
-                return port;
+                return address.getPort();
             }
 
             @Override
@@ -36,11 +40,16 @@ public interface Authentication {
         };
     }
 
-    static @NotNull Authentication create(@NotNull InetSocketAddress address, @NotNull String username, @NotNull String password) {
+    static @NotNull Authentication create(@NotNull Object key, @NotNull InetSocketAddress address, @NotNull String username, @NotNull String password) {
         return new Authentication() {
             @Override
-            public @NotNull SocketAddress getAddress() {
-                return address;
+            public @UnknownNullability Object getKey() {
+                return key;
+            }
+
+            @Override
+            public @NotNull InetAddress getAddress() {
+                return address.getAddress();
             }
 
             @Override
@@ -62,7 +71,9 @@ public interface Authentication {
 
     // Objects
 
-    @NotNull SocketAddress getAddress();
+    @UnknownNullability Object getKey();
+
+    @NotNull InetAddress getAddress();
 
     @Range(from = 0, to = 65535) int getPort();
 

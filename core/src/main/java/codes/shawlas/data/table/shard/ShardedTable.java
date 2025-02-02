@@ -1,9 +1,7 @@
 package codes.shawlas.data.table.shard;
 
 import codes.shawlas.data.connection.Authentication;
-import codes.shawlas.data.connection.Database;
 import codes.shawlas.data.exception.table.column.InvalidColumnException;
-import codes.shawlas.data.exception.table.shard.InvalidTableException;
 import codes.shawlas.data.exception.table.shard.IllegalDatabaseException;
 import codes.shawlas.data.table.standard.Column;
 import codes.shawlas.data.table.standard.Element;
@@ -20,26 +18,30 @@ import java.util.function.BiPredicate;
 
 public interface ShardedTable extends Table {
 
-    @NotNull Database getDatabase();
+    @NotNull Shards getShards();
 
+    @Override
     @NotNull ShardedElements getElements();
 
-    @NotNull Shards getShards();
+    @Override
+    @NotNull ShardedColumns getColumns();
 
     // Classes
 
     interface ShardedElements extends Elements {
 
+        @Override
         @NotNull ShardedTable getTable();
 
-        @NotNull Optional<? extends @NotNull Element> get(@NotNull Shard shard, int row);
+        @NotNull Optional<? extends @NotNull Element> get(@NotNull Shard shard, @NotNull String table, int row);
 
-        boolean delete(@NotNull Shard shard, int row) ;
+        boolean delete(@NotNull Shard shard, @NotNull String table, int row) ;
 
     }
 
     interface ShardedColumns extends Columns {
 
+        @Override
         @NotNull ShardedTable getTable();
 
         @NotNull Collection<? extends @NotNull Column<?>> getShattered();
@@ -53,18 +55,25 @@ public interface ShardedTable extends Table {
         /**
          * @throws IllegalArgumentException if the priority is zero or negative
          * @throws IllegalDatabaseException if the specific database is not registered and cannot be sharded
-         * @throws IOException if database is closed
+         * @throws IOException if an I/O error occurs while trying to connect in another database
          * */
-        @NotNull Shard apply(@NotNull Database database, @NotNull BiPredicate<@NotNull Column<?>, @Nullable Object> predicate, int priority) throws InvalidTableException, IllegalDatabaseException, IllegalArgumentException, IOException;
+        @NotNull Shard apply(@NotNull Authentication authentication, @NotNull BiPredicate<@NotNull Column<?>, @Nullable Object> predicate, int priority) throws IllegalDatabaseException, IOException;
 
         /**
-         * @throws IOException if an I/O error occurs when
+         * Get the shard with the highest priority associate to a specific element parameter.
+         *
+         * @return The highest shard.
+         *
+         * @throws IllegalStateException if no one shards was defined
+         * @throws IllegalArgumentException if the element does not exist
          * */
-        @NotNull Database register(@NotNull Authentication authentication) throws IOException;
+        @NotNull Shard get(@NotNull Element element);
+
+        @NotNull Optional<? extends @NotNull Shard> get(@NotNull EntryData<?> data);
+
+        @NotNull Optional<? extends @NotNull Shard> get(@NotNull String id);
 
         @Unmodifiable @NotNull Collection<? extends @NotNull Shard> getAll();
-
-        @Unmodifiable @NotNull Collection<? extends @NotNull Shard> getAll(@NotNull EntryData<?> data) throws InvalidColumnException;
 
     }
 }

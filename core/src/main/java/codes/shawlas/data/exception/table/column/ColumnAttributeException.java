@@ -7,8 +7,8 @@ import org.jetbrains.annotations.NotNull;
  * <P>If a column is a key, the value cannot be changed.
  * If is not nullable, a null value is not accept</P>
  * */
-public class ColumnTypeException extends ColumnException {
-    public ColumnTypeException(@NotNull String message) {
+public class ColumnAttributeException extends ColumnException {
+    public ColumnAttributeException(@NotNull String message) {
         super(message);
     }
 }

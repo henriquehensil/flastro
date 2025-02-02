@@ -1,7 +1,8 @@
 package codes.shawlas.data.table.index;
 
 import codes.shawlas.data.exception.table.column.ColumnAlreadyIndexedException;
-import codes.shawlas.data.exception.table.column.ColumnTypeException;
+import codes.shawlas.data.exception.table.column.ColumnAttributeException;
+import codes.shawlas.data.exception.table.column.ColumnException;
 import codes.shawlas.data.exception.table.column.InvalidColumnException;
 import codes.shawlas.data.table.standard.Column;
 import codes.shawlas.data.table.standard.Element;
@@ -26,6 +27,8 @@ public interface IndexedTable extends Table {
     @Override
     @NotNull IndexedColumns getColumns();
 
+    @NotNull Indexes getIndexes();
+
     // Classes
 
     interface IndexedElements extends Elements {
@@ -39,9 +42,9 @@ public interface IndexedTable extends Table {
 
         /**
          * @throws InvalidColumnException if {@code data#getColumn} does not exists in this table
-         * @throws ColumnTypeException if {@code data#getColumn} is not a key
+         * @throws ColumnAttributeException if {@code data#getColumn} is not a key
          * */
-        @NotNull Optional<? extends @NotNull Element> getUnique(@NotNull EntryData<?> data) throws InvalidColumnException, ColumnTypeException;
+        @NotNull Optional<? extends @NotNull Element> getUnique(@NotNull EntryData<?> data) throws ColumnException;
 
         /**
          * Delete all elements that contains the value
@@ -52,9 +55,9 @@ public interface IndexedTable extends Table {
 
         /**
          * @throws InvalidColumnException if {@code data#getColumn} does not exists in this table
-         * @throws ColumnTypeException if {@code data#getColumn} is not a key
+         * @throws ColumnAttributeException if {@code data#getColumn} is not a key
          * */
-        boolean deleteUnique(@NotNull EntryData<?> data) throws ColumnTypeException, InvalidColumnException;
+        boolean deleteUnique(@NotNull EntryData<?> data) throws ColumnException;
 
     }
 
@@ -70,7 +73,11 @@ public interface IndexedTable extends Table {
 
         @NotNull IndexedTable getTable();
 
-        @NotNull Index create(@NotNull Column<?> column) throws InvalidColumnException, ColumnAlreadyIndexedException;
+        /**
+         * @throws ColumnAlreadyIndexedException if the column is already indexed
+         * @throws InvalidColumnException if the column doest not belong to this table
+         * */
+        @NotNull Index create(@NotNull Column<?> column) throws ColumnException;
 
         boolean delete(@NotNull Column<?> column);
 

@@ -12,7 +12,6 @@ public interface FilePermission {
 
     static @NotNull FilePermission create(boolean canRead, boolean canWrite, boolean canExecute) {
         return new FilePermission() {
-
             private boolean read = canRead;
             private boolean write = canWrite;
             private boolean execute = canExecute;
@@ -41,7 +40,6 @@ public interface FilePermission {
 
             // Native
 
-
             @Override
             public @NotNull String toString() {
                 return String.valueOf(getCode());
@@ -65,9 +63,7 @@ public interface FilePermission {
     }
 
     static @NotNull FilePermission parse(int code) {
-        if (code < 0 || code > 7) {
-            throw new IllegalArgumentException("Invalid permission code");
-        }
+        if (code < 0 || code > 7) throw new IllegalArgumentException("Invalid permission code");
 
         return create(code >= 4, code >= 2, code >= 1);
     }
@@ -83,19 +79,14 @@ public interface FilePermission {
     void setPermission(boolean canRead, boolean canWrite, boolean canExecute);
 
     default void setPermission(int code) {
-        if (code < 0 || code > 7) {
-            throw new IllegalArgumentException("Invalid permission code");
-        }
+        if (code < 0 || code > 7) throw new IllegalArgumentException("Invalid permission code");
 
         setPermission(code >= 4, code >= 2, code >= 1);
     }
 
     default @Range(from = 0, to = 7) int getCode() {
         int n = 0;
-
-        if (canRead()) n += 4;
-        if (canWrite()) n += 2;
-        if (canExecute()) n ++;
+        if (canRead()) n += 4; if (canWrite()) n += 2; if (canExecute()) n ++;
 
         return n;
     }

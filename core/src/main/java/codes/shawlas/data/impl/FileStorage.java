@@ -4,13 +4,11 @@ import codes.shawlas.data.storage.Storage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.nio.file.FileAlreadyExistsException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.nio.file.*;
 import java.util.HashSet;
 import java.util.Set;
 
-public final class FileStorage implements Storage {
+public class FileStorage implements Storage {
 
     private final @NotNull FileManager manager = new FileManager();
     private final @NotNull Path root;
@@ -24,11 +22,11 @@ public final class FileStorage implements Storage {
     }
 
     @Override
-    public @NotNull String getId() {
+    public final @NotNull String getId() {
         return "#file_storage";
     }
 
-    public @NotNull Path getRoot() {
+    public final @NotNull Path getRoot() {
         return root;
     }
 
@@ -38,30 +36,33 @@ public final class FileStorage implements Storage {
 
     // Classes
 
-    public final class FileManager {
+    public class FileManager {
 
         private final @NotNull Set<@NotNull Path> paths = new HashSet<>();
 
-        public @NotNull File create(@NotNull Path folders, @NotNull String name, @NotNull InputStream data) throws IOException {
-            folders = folders.startsWith(root) ? folders.resolve(name) : root.resolve(folders.resolve(name));
+        public @NotNull File create(@NotNull String folders, @NotNull String name, @NotNull InputStream data) throws IOException {
+            @NotNull Path path = Paths.get(folders, name);
+            path = path.startsWith(root) ? path : root.resolve(path);
 
-            if (contains(folders)) {
+            if (contains(path)) {
                 throw new FileAlreadyExistsException("The file already exists: " + folders);
             }
 
-            if (!Files.exists(folders.getParent())) {
-                Files.createDirectory(folders.getParent());
+            if (!Files.exists(path.getParent())) {
+                Files.createDirectory(path.getParent());
             }
 
-            Files.createFile(folders);
+            Files.createFile(path);
 
-            if (Files.isDirectory(folders)) {
-                throw new IllegalArgumentException("The path already exists, but the " + name + " is not a file: " + folders);
+            if (Files.isDirectory(path)) {
+                throw new IllegalArgumentException("The path already exists, but the " + name + " is not a file: " + path);
             }
 
-            final @NotNull File file = folders.toFile();
+            final @NotNull File file = path.toFile();
             write(file, data);
-            paths.add(folders);
+            paths.add(path);
+
+            System.out.println("create: " + path);
 
             return file;
         }
@@ -80,19 +81,25 @@ public final class FileStorage implements Storage {
             }
         }
 
-        public boolean contains(@NotNull Path path) {
+        public boolean contains(@NotNull String path) {
+            try {
+                return contains(Paths.get(path));
+            } catch (InvalidPathException e) {
+                return false;
+            }
+        }
+
+        public final boolean contains(@NotNull Path path) {
             return paths.contains(path.startsWith(root) ? path : root.resolve(path));
         }
 
-        public boolean delete(@NotNull Path path) throws IOException {
-            path = path.startsWith(root) ? path : root.resolve(path);
+        public boolean delete(@NotNull String path) throws IOException {
+            final @NotNull Path p = path.startsWith(root.toString()) ? Paths.get(path) : root.resolve(path);
 
-            if (!contains(path)) {
-                return false;
-            } else {
-                Files.delete(path);
-                return true;
-            }
+            System.out.println(p);
+
+            paths.remove(p);
+            return Files.deleteIfExists(p);
         }
     }
 }

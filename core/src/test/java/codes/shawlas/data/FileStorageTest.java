@@ -23,16 +23,22 @@ final class FileStorageTest {
     public void initialContext() throws IOException {
         final @NotNull Path path = Paths.get("user.dir");
 
-        Assertions.assertFalse(storage.getManager().contains(path));
-        Assertions.assertFalse(storage.getManager().delete(path));
+        Assertions.assertFalse(storage.getManager().contains(path.toString()));
+        Assertions.assertFalse(storage.getManager().delete(path.toString()));
     }
 
     @Test
     @Order(value = 1)
     public void createSimple() throws IOException {
-        storage.getManager().create(Paths.get(""), "test", new ByteArrayInputStream("hello world".getBytes()));
+        storage.getManager().create("", "test", new ByteArrayInputStream("hello world".getBytes()));
 
-        Assertions.assertTrue(storage.getManager().contains(Paths.get("","test")));
+        Assertions.assertTrue(storage.getManager().contains("test"));
     }
 
+    @Test
+    @Order(value = 2)
+    public void delete() throws IOException {
+        Assertions.assertTrue(storage.getManager().delete("test"));
+        Assertions.assertFalse(storage.getManager().contains("test"));
+    }
 }

@@ -12,6 +12,7 @@ public class FileStorage implements Storage {
 
     private final @NotNull FileManager manager = new FileManager();
     private final @NotNull Path root;
+    private final @NotNull Object lock = new Object();
 
     public FileStorage(@NotNull Path root) throws IOException {
         if (!Files.exists(root)) {
@@ -44,27 +45,27 @@ public class FileStorage implements Storage {
             @NotNull Path path = Paths.get(folders, name);
             path = path.startsWith(root) ? path : root.resolve(path);
 
-            if (contains(path)) {
-                throw new FileAlreadyExistsException("The file already exists: " + folders);
+            synchronized (lock) {
+                if (contains(path)) {
+                    throw new FileAlreadyExistsException("The file already exists: " + folders);
+                }
+
+                if (!Files.exists(path.getParent())) {
+                    Files.createDirectory(path.getParent());
+                }
+
+                Files.createFile(path);
+
+                if (Files.isDirectory(path)) {
+                    throw new IllegalArgumentException("The path already exists, but the " + name + " is not a file: " + path);
+                }
+
+                final @NotNull File file = path.toFile();
+                write(file, data);
+                paths.add(path);
+
+                return file;
             }
-
-            if (!Files.exists(path.getParent())) {
-                Files.createDirectory(path.getParent());
-            }
-
-            Files.createFile(path);
-
-            if (Files.isDirectory(path)) {
-                throw new IllegalArgumentException("The path already exists, but the " + name + " is not a file: " + path);
-            }
-
-            final @NotNull File file = path.toFile();
-            write(file, data);
-            paths.add(path);
-
-            System.out.println("create: " + path);
-
-            return file;
         }
 
         private void write(@NotNull File file, @NotNull InputStream inputStream) throws IOException {
@@ -90,16 +91,30 @@ public class FileStorage implements Storage {
         }
 
         public final boolean contains(@NotNull Path path) {
-            return paths.contains(path.startsWith(root) ? path : root.resolve(path));
+            synchronized (lock) {
+                return paths.contains(path.startsWith(root) ? path : root.resolve(path));
+            }
+        }
+
+        public @NotNull InputStream get(@NotNull Path path) throws IOException {
+            path = path.startsWith(root) ? path : root.resolve(path);
+
+            synchronized (lock) {
+                if (!paths.contains(path)) {
+                    throw new FileNotFoundException("The path doest not exists in the storage");
+                }
+
+                return Files.newInputStream(path);
+            }
         }
 
         public boolean delete(@NotNull String path) throws IOException {
             final @NotNull Path p = path.startsWith(root.toString()) ? Paths.get(path) : root.resolve(path);
 
-            System.out.println(p);
-
-            paths.remove(p);
-            return Files.deleteIfExists(p);
+            synchronized (lock) {
+                paths.remove(p);
+                return Files.deleteIfExists(p);
+            }
         }
     }
 }

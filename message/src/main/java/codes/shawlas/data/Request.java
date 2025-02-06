@@ -9,6 +9,7 @@ import java.util.Objects;
 public sealed class Request permits Request.Server, Request.Client {
 
     private final @Range(from = 0, to = Long.MAX_VALUE) int id;
+    private boolean finished;
 
     protected Request(int id) {
         if (id <= 0) throw new IllegalArgumentException("Invalid id");
@@ -25,6 +26,14 @@ public sealed class Request permits Request.Server, Request.Client {
 
     public final boolean isClient() {
         return this instanceof Client;
+    }
+
+    public boolean isFinished() {
+        return finished;
+    }
+
+    public void finish() {
+        finished = true;
     }
 
     @Override

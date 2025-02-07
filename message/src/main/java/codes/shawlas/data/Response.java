@@ -4,33 +4,34 @@ import codes.shawlas.data.exception.MessageExecutionException;
 import codes.shawlas.data.exception.MessageSendingException;
 import org.jetbrains.annotations.NotNull;
 
-public sealed interface Request permits Request.Input, Request.Output {
+public interface Response {
 
     @NotNull Object getId();
 
-    @NotNull Object getCode();
+    @NotNull Request getRequest();
 
     @NotNull Message getMessage();
 
-    void finish();
-
     // Classes
 
-    non-sealed interface Input extends Request {
+    interface Input extends Response {
 
         @Override
         @NotNull Message.Input getMessage();
 
-        void execute(@NotNull Object @NotNull ... args) throws MessageExecutionException;
+        void execute(@NotNull Object @NotNull ... args) throws MessageExecutionException;;
+
+        boolean isFinished();
 
     }
 
-    non-sealed interface Output extends Request {
+    interface Output extends Response {
 
         @Override
         @NotNull Message.Output getMessage();
 
-        void send(@NotNull Object @NotNull ... args) throws MessageSendingException;
+        void send(boolean finish, @NotNull Object @NotNull ... args) throws MessageSendingException;
 
     }
+
 }

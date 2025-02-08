@@ -6,13 +6,15 @@ import org.jetbrains.annotations.NotNull;
 
 public sealed interface Request permits Request.Input, Request.Output {
 
-    @NotNull Object getId();
+    default @NotNull Object getId() {
+        return getMessage().getId();
+    }
 
-    @NotNull Object getCode();
+    @NotNull String getCommand();
 
     @NotNull Message getMessage();
 
-    void finish();
+    boolean isFinished();
 
     // Classes
 

@@ -21,8 +21,6 @@ public interface Response {
 
         void execute(@NotNull Object @NotNull ... args) throws MessageExecutionException;;
 
-        boolean isFinished();
-
     }
 
     interface Output extends Response {

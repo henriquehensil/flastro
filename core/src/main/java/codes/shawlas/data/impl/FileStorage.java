@@ -5,8 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.nio.file.*;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class FileStorage implements Storage {
 
@@ -114,6 +113,17 @@ public class FileStorage implements Storage {
             synchronized (lock) {
                 paths.remove(p);
                 return Files.deleteIfExists(p);
+            }
+        }
+
+        public void deleteAll() {
+            synchronized (lock) {
+                for (@NotNull Path p : paths) {
+                    try {
+                        Files.deleteIfExists(p);
+                    } catch (IOException ignore) {
+                    }
+                }
             }
         }
     }

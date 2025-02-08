@@ -13,9 +13,17 @@ import java.nio.file.Paths;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 final class FileStorageTest {
 
-    private final @NotNull FileStorage storage = new FileStorage(Paths.get(System.getProperty("user.dir"), "/root"));
+    private static final @NotNull FileStorage storage;
 
-    private FileStorageTest() throws IOException {
+    static {
+        try {
+            storage = new FileStorage(Paths.get(System.getProperty("user.dir"), "/root"));
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private FileStorageTest() {
     }
 
     @Test
@@ -29,16 +37,28 @@ final class FileStorageTest {
 
     @Test
     @Order(value = 1)
-    public void createSimple() throws IOException {
-        storage.getManager().create("", "test", new ByteArrayInputStream("hello world".getBytes()));
-
-        Assertions.assertTrue(storage.getManager().contains("test"));
+    public void createSimple() {
+        Assertions.assertDoesNotThrow(() -> storage.getManager().create("", "test", new ByteArrayInputStream("hello world".getBytes())));
     }
 
     @Test
     @Order(value = 2)
+    public void contains() {
+        Assertions.assertTrue(storage.getManager().contains("test"));
+        Assertions.assertTrue(storage.getManager().contains(storage.getRoot().resolve("test")));
+    }
+
+    @Test
+    @Order(value = 3)
     public void delete() throws IOException {
         Assertions.assertTrue(storage.getManager().delete("test"));
+        Assertions.assertFalse(storage.getManager().contains("test"));
+    }
+
+    @Test
+    @Order(value = 4)
+    public void deleteAll() {
+        storage.getManager().deleteAll();
         Assertions.assertFalse(storage.getManager().contains("test"));
     }
 }

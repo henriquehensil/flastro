@@ -4,7 +4,7 @@ import codes.shawlas.data.exception.MessageExecutionException;
 import codes.shawlas.data.exception.MessageSendingException;
 import org.jetbrains.annotations.NotNull;
 
-public interface Response {
+public sealed interface Response permits Response.Input, Response.Output {
 
     @NotNull Object getId();
 
@@ -14,7 +14,7 @@ public interface Response {
 
     // Classes
 
-    interface Input extends Response {
+    non-sealed interface Input extends Response {
 
         @Override
         @NotNull Message.Input getMessage();
@@ -23,7 +23,7 @@ public interface Response {
 
     }
 
-    interface Output extends Response {
+    non-sealed interface Output extends Response {
 
         @Override
         @NotNull Message.Output getMessage();

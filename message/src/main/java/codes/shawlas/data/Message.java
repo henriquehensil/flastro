@@ -1,26 +1,35 @@
 package codes.shawlas.data;
 
+import codes.shawlas.data.exception.MessageExecutionException;
+import codes.shawlas.data.exception.MessageSendingException;
 import codes.shawlas.data.exception.NoSuchHeaderException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
 
-public sealed interface Message permits Message.Input, Message.Output {
+public sealed interface Message permits AbstractMessage, Message.Input, Message.Output {
 
-    @NotNull Object getId();
+    @NotNull String getId();
 
-    /**
-     * @throws NoSuchHeaderException if the {@code attribute} is not present
-     * */
-    @NotNull Object get(@NotNull String attribute) throws NoSuchHeaderException;
+    @Nullable String getCorrelationId();
 
-    @NotNull Object serialize();
+    @UnknownNullability Object get(@NotNull String attribute) throws NoSuchHeaderException;
+
+    byte @NotNull [] serialize();
+
+    boolean isFinished();
 
     // Classes
 
     non-sealed interface Input extends Message {
 
+        void execute() throws MessageExecutionException;
+
     }
 
     non-sealed interface Output extends Message {
+
+        void send(boolean finish) throws MessageSendingException;
 
     }
 }

@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.InputStream;
 
-public sealed interface Message permits Request, Response, Message.Input, Message.Output {
+public sealed interface Message permits Message.Input, Message.Output {
 
     @NotNull String getId();
 
@@ -15,6 +15,11 @@ public sealed interface Message permits Request, Response, Message.Input, Messag
     non-sealed interface Input extends Message {
 
         @NotNull Message.Parser getParser();
+
+        /**
+         * @throws MessageExecutionException if an error occurs while execute the response ({@linkplain Input##optional-restrictions optional})
+         * */
+        void execute(@NotNull Object @NotNull ... args);
 
     }
 
@@ -27,12 +32,6 @@ public sealed interface Message permits Request, Response, Message.Input, Messag
     interface Parser {
 
         @NotNull Message.Input deserialize(@NotNull InputStream inputStream) throws MessageParserException;
-
-    }
-
-    interface Executor extends Message.Input {
-
-        void execute() throws MessageExecutionException;
 
     }
 }

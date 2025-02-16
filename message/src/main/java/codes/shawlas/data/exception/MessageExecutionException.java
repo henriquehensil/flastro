@@ -2,7 +2,7 @@ package codes.shawlas.data.exception;
 
 import org.jetbrains.annotations.NotNull;
 
-public class MessageExecutionException extends Exception {
+public class MessageExecutionException extends RuntimeException {
     public MessageExecutionException(@NotNull String message) {
         super(message);
     }

@@ -14,15 +14,15 @@
 
     <dependencies>
         <dependency>
-            <groupId>codes.shawlas.data</groupId>
-            <artifactId>message</artifactId>
-            <version>1.0</version>
-        </dependency>
-
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.11.0</version>
+        </dependency>
+        <dependency>
+            <groupId>codes.shawlas.data</groupId>
+            <artifactId>core</artifactId>
+            <version>1.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 

@@ -24,7 +24,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-public abstract sealed class ByteBufferReader implements Comparable<@NotNull ByteBufferReader> permits FileUploadBufferReader {
+public abstract sealed class ByteBufferReader implements Comparable<@NotNull ByteBufferReader> permits ByteFileUploadReader {
 
     // Static initializer
 
@@ -105,7 +105,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
 
     // Classes
 
-    public abstract sealed class MessageReader permits FileUploadBufferReader.Reader {
+    public abstract sealed class MessageReader permits ByteFileUploadReader.Reader {
 
         protected @Nullable Message.Input message;
         protected @Nullable MessageReaderException exception;
@@ -250,7 +250,9 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             return OffsetDateTime.parse(nextString());
         }
 
-        public abstract sealed class MessageExecutor permits FileUploadBufferReader.Reader.Executor {
+        // Classes
+
+        public abstract sealed class MessageExecutor permits ByteFileUploadReader.Reader.Executor {
 
             protected final @NotNull Message.Input message;
             protected final @NotNull Database database;
@@ -280,8 +282,4 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             public abstract @NotNull CompletableFuture<Void> execute(@NotNull SocketChannel channel);
         }
     }
-
-    // Executor
-
-
 }

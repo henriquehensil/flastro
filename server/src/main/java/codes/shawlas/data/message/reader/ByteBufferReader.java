@@ -8,6 +8,7 @@ import codes.shawlas.data.message.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import codes.shawlas.data.exception.message.MessageReaderException;
+import codes.shawlas.data.exception.message.MessageExecutorException;
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
@@ -15,26 +16,22 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-public abstract class ByteReader implements Comparable<@NotNull ByteReader> {
+public abstract sealed class ByteBufferReader implements Comparable<@NotNull ByteBufferReader> permits FileUploadBufferReader {
 
     // Static initializer
 
     /**
-     * @throws IllegalArgumentException if capacity is negative or code doest not exists
+     * @throws IllegalArgumentException if capacity is negative or code doest not exists.
      * */
-    public static @NotNull ByteReader fromCode(byte code, int capacity) {
-        return ByteReaders.get(code, capacity);
-    }
-
-    /**
-     * @throws IllegalArgumentException if capacity is negative or code doest not exists
-     * */
-    public static @NotNull ByteReader fromChannel(@NotNull SocketChannel channel, int capacity) throws IOException, IllegalMessageException {
+    public static @NotNull ByteBufferReader fromChannel(@NotNull SocketChannel channel, int capacity) throws IOException, IllegalMessageException {
         @NotNull ByteBuffer buffer = ByteBuffer.allocate(1);
         int read = channel.read(buffer);
 
@@ -49,6 +46,10 @@ public abstract class ByteReader implements Comparable<@NotNull ByteReader> {
         }
     }
 
+    private static @NotNull ByteBufferReader fromCode(byte code, int capacity) {
+        return ByteReaders.get(code, capacity);
+    }
+
     // Objects
 
     protected final @NotNull ByteBuffer buffer;
@@ -57,14 +58,15 @@ public abstract class ByteReader implements Comparable<@NotNull ByteReader> {
     /**
      * @throws IllegalArgumentException if capacity is negative
      * */
-    protected ByteReader(byte code, int capacity) {
+    protected ByteBufferReader(byte code, int capacity) {
         this.buffer = ByteBuffer.allocate(capacity);
         this.code = code;
+        getReader().nextMessage();
     }
 
     // Abstract
 
-    public abstract @NotNull MessageReader getMessageReader();
+    public abstract @NotNull MessageReader getReader();
 
     // Getters
 
@@ -80,23 +82,30 @@ public abstract class ByteReader implements Comparable<@NotNull ByteReader> {
         buffer.clear();
 
         int read = channel.read(buffer);
-
         if (read == -1) throw new ClosedChannelException();
-        buffer.flip();
 
         return read;
+    }
+
+    public int write(@NotNull WritableByteChannel channel) throws IOException {
+        buffer.flip();
+        return channel.write(buffer);
+    }
+
+    public boolean isFullyRead() {
+        return !buffer.hasRemaining();
     }
 
     // Comparable implementation
 
     @Override
-    public int compareTo(@NotNull ByteReader o) {
+    public int compareTo(@NotNull ByteBufferReader o) {
         return Integer.compare(getCapacity(), o.getCapacity());
     }
 
     // Classes
 
-    public abstract class MessageReader {
+    public abstract sealed class MessageReader permits FileUploadBufferReader.Reader {
 
         protected @Nullable Message.Input message;
         protected @Nullable MessageReaderException exception;
@@ -232,20 +241,47 @@ public abstract class ByteReader implements Comparable<@NotNull ByteReader> {
                 return new String(bytes, StandardCharsets.UTF_8);
             }
         }
+
+        public @NotNull UUID nextId() throws IOException {
+            return UUID.fromString(nextString());
+        }
+
+        public @NotNull OffsetDateTime nextTime() throws IOException {
+            return OffsetDateTime.parse(nextString());
+        }
+
+        public abstract sealed class MessageExecutor permits FileUploadBufferReader.Reader.Executor {
+
+            protected final @NotNull Message.Input message;
+            protected final @NotNull Database database;
+
+            protected MessageExecutor(@NotNull Database database) {
+                @Nullable Message.Input message = MessageReader.this.message;
+
+                if (message == null) {
+                    if (exception == null) {
+                        throw new MessageStateException("The message has been not read");
+                    } else {
+                        throw new MessageStateException("The message is invalid", exception);
+                    }
+                }
+
+                this.database = database;
+                this.message = message;
+            }
+
+            /**
+             * A {@link CompletableFuture} async method for execute the message.
+             *
+             * <p>The future will always completed with {@link MessageExecutorException} if some error occurs.
+             *
+             * @param channel The channel used to update the buffer reader if needed.
+             * */
+            public abstract @NotNull CompletableFuture<Void> execute(@NotNull SocketChannel channel);
+        }
     }
 
     // Executor
 
-    public abstract static class MessageExecutor {
 
-        protected final @NotNull Message.Input message;
-        protected final @NotNull Database database;
-
-        protected MessageExecutor(@NotNull Message.Input message, @NotNull Database database) {
-            this.message = message;
-            this.database = database;
-        }
-
-        public abstract @NotNull CompletableFuture<Void> execute();
-    }
 }

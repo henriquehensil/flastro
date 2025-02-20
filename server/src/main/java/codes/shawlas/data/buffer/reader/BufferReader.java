@@ -1,21 +1,23 @@
-package codes.shawlas.data.message.reader;
+package codes.shawlas.data.buffer.reader;
 
 import codes.shawlas.data.database.Database;
+import codes.shawlas.data.exception.buffer.MinimumBytesException;
 import codes.shawlas.data.exception.message.DataTypeException;
 import codes.shawlas.data.exception.message.IllegalMessageException;
 import codes.shawlas.data.exception.message.MessageStateException;
 import codes.shawlas.data.message.Message;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
 import codes.shawlas.data.exception.message.MessageReaderException;
 import codes.shawlas.data.exception.message.MessageExecutorException;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
@@ -24,30 +26,56 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-public abstract sealed class ByteBufferReader implements Comparable<@NotNull ByteBufferReader> permits ByteFileUploadReader {
+public abstract sealed class BufferReader implements Comparable<@NotNull BufferReader> permits FileUploadReader {
 
     // Static initializer
 
-    /**
-     * @throws IllegalArgumentException if capacity is negative or code doest not exists.
-     * */
-    public static @NotNull ByteBufferReader fromChannel(@NotNull SocketChannel channel, int capacity) throws IOException, IllegalMessageException {
-        @NotNull ByteBuffer buffer = ByteBuffer.allocate(1);
-        int read = channel.read(buffer);
-
-        if (read == 0) {
-            throw new IllegalMessageException("bytes cannot be null");
-        } else if (read == -1) {
-            throw new ClosedChannelException();
-        } else {
-            buffer.flip();
-            byte code = buffer.get();
-            return fromCode(code, capacity);
-        }
+    public static @NotNull BufferReader allocate(byte code, int capacity) {
+        return BufferReaders.get(code, capacity);
     }
 
-    private static @NotNull ByteBufferReader fromCode(byte code, int capacity) {
-        return ByteReaders.get(code, capacity);
+    public static @NotNull BufferReader allocate(byte @NotNull [] bytes) {
+        if (bytes.length == 0) {
+            throw new MinimumBytesException("Cannot accepted null bytes");
+        }
+
+        return BufferReaders.get(bytes, false);
+    }
+
+    public static @NotNull BufferReader allocate(@NotNull ByteBuffer buffer) {
+        return allocate(buffer.array());
+    }
+
+    /**
+     * Allocates an independent buffer reader.
+     *
+     * <p>An independent buffer reader automatically executes the {@link MessageReader#read()} method asynchronously.
+     *
+     * <p>If the given parameter doest not have sufficient data, the read method will throw an {@link IllegalMessageException}
+     * and {@link MessageReader#getExecutor(Database)} will become unsupported.
+     *
+     * <p>Use this when you are certain that there is sufficient data.
+     * */
+    public static @NotNull BufferReader allocateIndependent(byte @NotNull [] bytes) {
+        if (bytes.length == 0) {
+            throw new MinimumBytesException("Cannot accepted null bytes");
+        }
+
+        return BufferReaders.get(bytes, true);
+    }
+
+    /**
+     * Allocates an independent buffer reader.
+     *
+     * <p>An independent buffer reader automatically executes the {@link MessageReader#read()} method asynchronously.
+     *
+     * <p>If the given parameter doest not have sufficient data, the read method will throw an {@link IllegalMessageException}
+     * and {@link MessageReader#getExecutor(Database)} will become unsupported.
+     *
+     * <p>Use this when you are certain that there is sufficient data.
+     * */
+    public static @NotNull BufferReader allocateIndependent(@NotNull ByteBuffer buffer) {
+        return allocateIndependent(buffer.array());
     }
 
     // Objects
@@ -56,12 +84,26 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
     private final byte code;
 
     /**
+     * Create an empty buffer reader.
+     *
      * @throws IllegalArgumentException if capacity is negative
      * */
-    protected ByteBufferReader(byte code, int capacity) {
+    protected BufferReader(byte code, int capacity) {
         this.buffer = ByteBuffer.allocate(capacity);
         this.code = code;
-        getReader().nextMessage();
+    }
+
+    protected BufferReader(byte @NotNull [] bytes, boolean independent) {
+        this.code = bytes[0];
+        this.buffer = ByteBuffer.wrap(bytes);
+
+        if (independent) {
+            getReader().nextMessage();
+        }
+    }
+
+    protected BufferReader(@NotNull ByteBuffer byteBuffer, boolean independent) {
+        this(byteBuffer.array(), independent);
     }
 
     // Abstract
@@ -92,20 +134,16 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
         return channel.write(buffer);
     }
 
-    public boolean isFullyRead() {
-        return !buffer.hasRemaining();
-    }
-
     // Comparable implementation
 
     @Override
-    public int compareTo(@NotNull ByteBufferReader o) {
+    public int compareTo(@NotNull BufferReader o) {
         return Integer.compare(getCapacity(), o.getCapacity());
     }
 
     // Classes
 
-    public abstract sealed class MessageReader permits ByteFileUploadReader.Reader {
+    public abstract sealed class MessageReader permits FileUploadReader.Reader {
 
         protected @Nullable Message.Input message;
         protected @Nullable MessageReaderException exception;
@@ -156,7 +194,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
          * @throws IndexOutOfBoundsException If the offset and length parameters are illegal
          * @throws EOFException If there are fewer than length bytes remaining in this buffer
          * */
-        public void next(byte @NotNull [] b, int off, int len) throws IOException {
+        protected void next(byte @NotNull [] b, int off, int len) throws IOException {
             try {
                 buffer.get(b, off, len);
             } catch (BufferOverflowException e) {
@@ -164,7 +202,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public boolean nextBoolean() throws EOFException {
+        protected boolean nextBoolean() throws EOFException {
             try {
                 return nextByte() != 0;
             } catch (BufferOverflowException e) {
@@ -172,7 +210,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public byte nextByte() throws EOFException {
+        protected byte nextByte() throws EOFException {
             try {
                 return buffer.get();
             } catch (BufferOverflowException e) {
@@ -180,7 +218,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public short nextShort() throws EOFException {
+        protected short nextShort() throws EOFException {
             try {
                 return buffer.getShort();
             } catch (BufferOverflowException e) {
@@ -188,7 +226,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public char nextChar() throws EOFException {
+        protected char nextChar() throws EOFException {
             try {
                 return buffer.getChar();
             } catch (BufferOverflowException e) {
@@ -196,7 +234,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public int nextInt() throws EOFException {
+        protected int nextInt() throws EOFException {
             try {
                 return buffer.getInt();
             } catch (BufferOverflowException e) {
@@ -204,7 +242,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public long nextLong() throws EOFException {
+        protected long nextLong() throws EOFException {
             try {
                 return buffer.getLong();
             } catch (BufferOverflowException e) {
@@ -212,7 +250,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public float nextFloat() throws EOFException {
+        protected float nextFloat() throws EOFException {
             try {
                 return buffer.getFloat();
             } catch (BufferOverflowException e) {
@@ -220,7 +258,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public double nextDouble() throws EOFException {
+        protected double nextDouble() throws EOFException {
             try {
                 return buffer.getDouble();
             } catch (BufferOverflowException e) {
@@ -228,7 +266,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public @NotNull String nextString() throws IOException {
+        protected @NotNull String nextString() throws IOException {
             short len = nextShort();
 
             if (len < 0) {
@@ -242,17 +280,17 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
             }
         }
 
-        public @NotNull UUID nextId() throws IOException {
+        protected @NotNull UUID nextId() throws IOException {
             return UUID.fromString(nextString());
         }
 
-        public @NotNull OffsetDateTime nextTime() throws IOException {
+        protected @NotNull OffsetDateTime nextTime() throws IOException {
             return OffsetDateTime.parse(nextString());
         }
 
         // Classes
 
-        public abstract sealed class MessageExecutor permits ByteFileUploadReader.Reader.Executor {
+        public abstract sealed class MessageExecutor permits FileUploadReader.Reader.Executor {
 
             protected final @NotNull Message.Input message;
             protected final @NotNull Database database;
@@ -279,7 +317,7 @@ public abstract sealed class ByteBufferReader implements Comparable<@NotNull Byt
              *
              * @param channel The channel used to update the buffer reader if needed.
              * */
-            public abstract @NotNull CompletableFuture<Void> execute(@NotNull SocketChannel channel);
+            public abstract @NotNull CompletableFuture<Void> execute(@NotNull ReadableByteChannel channel);
         }
     }
 }

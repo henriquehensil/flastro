@@ -1,6 +1,5 @@
-package codes.shawlas.data.connection;
+package codes.shawlas.data.database;
 
-import codes.shawlas.data.database.Database;
 import codes.shawlas.data.impl.FileStorage;
 import codes.shawlas.data.storage.Storage;
 import org.jetbrains.annotations.NotNull;
@@ -8,10 +7,9 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.net.SocketAddress;
 import java.nio.channels.*;
 import java.nio.file.Path;
-import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class DatabaseImpl implements Database {
@@ -64,7 +62,7 @@ public final class DatabaseImpl implements Database {
 
     final class ConnectionImpl implements Connection {
 
-        private final @NotNull Map<@NotNull SocketAddress,@NotNull SocketChannel> clients = new ConcurrentHashMap<>();
+        private final @NotNull Set<@NotNull SocketChannel> clients = ConcurrentHashMap.newKeySet();
         private @Nullable ServerSocketChannel server;
         private @Nullable Selector selector;
         private @Nullable Thread thread;
@@ -110,8 +108,9 @@ public final class DatabaseImpl implements Database {
             this.thread.interrupt();
             this.thread = null;
 
-            for (@NotNull SocketChannel channel : clients.values()) {
-                clients.remove(channel.getRemoteAddress()).close();
+            for (@NotNull SocketChannel channel : clients) {
+                clients.remove(channel);
+                channel.close();
             }
 
             this.server.close();
@@ -128,7 +127,7 @@ public final class DatabaseImpl implements Database {
             return server == null && selector == null && thread == null;
         }
 
-        @NotNull Map<@NotNull SocketAddress, @NotNull SocketChannel> getClients() {
+        @NotNull Set<@NotNull SocketChannel> getClients() {
             return clients;
         }
 

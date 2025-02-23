@@ -6,6 +6,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.Objects;
 import java.util.UUID;
@@ -54,35 +55,35 @@ public abstract class MessageReader {
 
     // Data
 
-    public boolean nextBoolean() {
+    protected boolean nextBoolean() {
         return buffer.get() != 0;
     }
 
-    public short nextShort() {
+    protected short nextShort() {
         return buffer.getShort();
     }
 
-    public char nextChar() {
+    protected char nextChar() {
         return buffer.getChar();
     }
 
-    public int nextInt() {
+    protected int nextInt() {
         return buffer.getInt();
     }
 
-    public long nextLong() {
+    protected long nextLong() {
         return buffer.getLong();
     }
 
-    public float nextFloat() {
+    protected float nextFloat() {
         return buffer.getFloat();
     }
 
-    public double nextDouble() {
+    protected double nextDouble() {
         return buffer.getDouble();
     }
 
-    public @NotNull String nextString() {
+    protected @NotNull String nextString() {
         int len = nextShort() & 0xFFF;
 
         if (buffer.remaining() < len) {
@@ -98,12 +99,16 @@ public abstract class MessageReader {
         return new String(chars);
     }
 
-    public @NotNull UUID nextId() {
+    protected @NotNull UUID nextId() {
         return UUID.fromString(nextString());
     }
 
-    public @NotNull OffsetDateTime nextTime() {
+    protected @NotNull OffsetDateTime nextTime() {
         return OffsetDateTime.parse(nextString());
+    }
+
+    protected @NotNull Path nextPath() {
+        return Path.of(nextString());
     }
 
     // Native

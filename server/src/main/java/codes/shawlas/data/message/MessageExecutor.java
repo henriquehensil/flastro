@@ -53,7 +53,7 @@ public abstract class MessageExecutor {
      *
      * @param channel The channel used to update the message buffer if needed.
      * */
-    public abstract @NotNull CompletableFuture<Void> execute(@NotNull ReadableByteChannel channel);
+    public abstract @NotNull CompletableFuture<Void> execute(@Nullable ReadableByteChannel channel);
 
     // Native
 

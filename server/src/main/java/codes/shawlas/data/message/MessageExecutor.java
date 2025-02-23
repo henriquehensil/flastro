@@ -13,7 +13,7 @@ public abstract class MessageExecutor {
 
     // Static
 
-    public static @NotNull MessageExecutor from(@NotNull Message.Input message, @NotNull Database database) {
+    public static @NotNull MessageExecutor getInstance(@NotNull Message.Input message, @NotNull Database database) {
         return MessageExecutors.get(message, database);
     }
 

@@ -5,7 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.Test;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -38,7 +37,7 @@ final class FileStorageTest {
     @Test
     @Order(value = 1)
     public void createSimple() {
-        Assertions.assertDoesNotThrow(() -> storage.getManager().create("", "test", new ByteArrayInputStream("hello world".getBytes())));
+        Assertions.assertDoesNotThrow(() -> storage.getManager().create("", "test"));
     }
 
     @Test

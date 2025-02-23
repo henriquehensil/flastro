@@ -1,4 +1,4 @@
-package codes.shawlas.data.message.content;
+package codes.shawlas.data.message.content.file;
 
 import codes.shawlas.data.message.Message;
 import org.jetbrains.annotations.NotNull;

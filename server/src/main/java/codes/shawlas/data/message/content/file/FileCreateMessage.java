@@ -1,4 +1,4 @@
-package codes.shawlas.data.message.content;
+package codes.shawlas.data.message.content.file;
 
 import codes.shawlas.data.message.Message;
 import org.jetbrains.annotations.NotNull;
@@ -39,6 +39,11 @@ public final class FileCreateMessage implements Message.Input {
     public @NotNull Path getPath() {
         return path;
     }
+
+    public @NotNull Path getCompletePath() {
+        return path.resolve(name);
+    }
+
 
     public @NotNull String getName() {
         return name;

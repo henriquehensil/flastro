@@ -1,4 +1,4 @@
-package codes.shawlas.data.message.content;
+package codes.shawlas.data.message.content.file;
 
 import codes.shawlas.data.message.Message;
 import org.jetbrains.annotations.NotNull;
@@ -52,11 +52,15 @@ public final class FileUploadMessage implements Message.Input {
         return path;
     }
 
+    public @NotNull Path getCompletePath() {
+        return path.resolve(path);
+    }
+
     public @NotNull String getName() {
         return name;
     }
 
-    public long getSize() {
+    public int getSize() {
         return size;
     }
 }

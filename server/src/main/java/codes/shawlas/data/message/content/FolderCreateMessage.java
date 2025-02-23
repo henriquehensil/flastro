@@ -7,13 +7,13 @@ import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
-public final class FileCreateFolderMessage implements Message.Input {
+public final class FolderCreateMessage implements Message.Input {
 
     private final @NotNull UUID id;
     private final @NotNull OffsetDateTime time;
     private final @NotNull Path paths;
 
-    public FileCreateFolderMessage(@NotNull UUID id, @NotNull OffsetDateTime time, @NotNull Path paths) {
+    public FolderCreateMessage(@NotNull UUID id, @NotNull OffsetDateTime time, @NotNull Path paths) {
         this.id = id;
         this.time = time;
         this.paths = paths;

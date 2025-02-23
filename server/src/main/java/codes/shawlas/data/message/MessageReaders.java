@@ -1,10 +1,12 @@
 package codes.shawlas.data.message;
 
-import codes.shawlas.data.exception.buffer.EmptyBufferException;
 import codes.shawlas.data.exception.message.MessageReaderException;
-import codes.shawlas.data.exception.buffer.NoSuchBufferException;
+import codes.shawlas.data.exception.message.NoSuchReaderException;
 import codes.shawlas.data.message.annotation.ByteCode;
-import codes.shawlas.data.message.content.FileUploadMessage;
+import codes.shawlas.data.message.content.file.FileCreateMessage;
+import codes.shawlas.data.message.content.file.FileDeleteMessage;
+import codes.shawlas.data.message.content.file.FileUploadMessage;
+import codes.shawlas.data.message.content.file.FolderCreateMessage;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
@@ -36,7 +38,7 @@ final class MessageReaders {
 
     private static @NotNull Class<? extends MessageReader> get(byte code) {
         if (!map.containsKey(code)) {
-            throw new NoSuchBufferException("The reader code doest not exists");
+            throw new NoSuchReaderException("The reader code doest not exists");
         }
 
         return map.get(code);
@@ -62,7 +64,7 @@ final class MessageReaders {
     @ByteCode(0x8)
     private static final class FileUploadReader extends MessageReader {
 
-        private FileUploadReader(@NotNull ByteBuffer buffer) throws EmptyBufferException {
+        private FileUploadReader(@NotNull ByteBuffer buffer) {
             super((byte) 0x8, buffer);
         }
 
@@ -86,9 +88,90 @@ final class MessageReaders {
 
             return future;
         }
+    }
 
-        private @NotNull Path nextPath() {
-            return Path.of(nextString());
+    @ByteCode(0x7)
+    public static final class FileCreateReader extends MessageReader {
+
+        private FileCreateReader(@NotNull ByteBuffer buffer) {
+            super((byte) 0x7, buffer);
+        }
+
+        @Override
+        public @NotNull CompletableFuture<Message.Input> nextMessage() {
+            @NotNull CompletableFuture<Message.Input> future = new CompletableFuture<>();
+
+            CompletableFuture.runAsync(() -> {
+                try {
+                    @NotNull UUID id = nextId();
+                    @NotNull OffsetDateTime time = nextTime();
+                    @NotNull Path path = nextPath();
+                    @NotNull String name = nextString();
+
+                    future.complete(new FileCreateMessage(id, time, path, name));
+                } catch (BufferUnderflowException e) {
+                    future.completeExceptionally(new MessageReaderException("It's not possible to continue reading", e));
+                }
+            });
+
+            return future;
+        }
+    }
+
+    // Implementations
+
+    @ByteCode(0X6)
+    private static final class FolderCreateReader extends MessageReader {
+
+        private FolderCreateReader(byte code, @NotNull ByteBuffer buffer) {
+            super((byte) 0X6, buffer);
+        }
+
+        @Override
+        public @NotNull CompletableFuture<Message.Input> nextMessage() {
+            @NotNull CompletableFuture<Message.Input> future = new CompletableFuture<>();
+
+            CompletableFuture.runAsync(() -> {
+                try {
+                    @NotNull UUID id = nextId();
+                    @NotNull OffsetDateTime time = nextTime();
+                    @NotNull Path path = nextPath();
+
+                    future.complete(new FolderCreateMessage(id, time, path));
+                } catch (BufferUnderflowException e) {
+                    future.completeExceptionally(new MessageReaderException("It's not possible to continue reading", e));
+                }
+            });
+
+            return future;
+        }
+    }
+
+    @ByteCode(0X5)
+    private static final class FileDeleteReader extends MessageReader {
+
+        private FileDeleteReader(byte code, @NotNull ByteBuffer buffer) {
+            super((byte) 0X6, buffer);
+        }
+
+        @Override
+        public @NotNull CompletableFuture<Message.Input> nextMessage() {
+            @NotNull CompletableFuture<Message.Input> future = new CompletableFuture<>();
+
+            CompletableFuture.runAsync(() -> {
+                try {
+                    @NotNull UUID id = nextId();
+                    @NotNull OffsetDateTime time = nextTime();
+                    @NotNull Path path = nextPath();
+                    @NotNull String name = nextString();
+
+                    future.complete(new FileDeleteMessage(id, time, path, name));
+                } catch (BufferUnderflowException e) {
+                    future.completeExceptionally(new MessageReaderException("It's not possible to continue reading", e));
+                }
+            });
+
+            return future;
         }
     }
 }

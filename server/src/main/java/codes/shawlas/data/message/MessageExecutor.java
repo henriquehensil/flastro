@@ -3,8 +3,8 @@ package codes.shawlas.data.message;
 import codes.shawlas.data.database.Database;
 import codes.shawlas.data.exception.message.MessageExecutorException;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
+import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -21,29 +21,10 @@ public abstract class MessageExecutor {
 
     protected final @NotNull Message.Input message;
     protected final @NotNull Database database;
-    protected boolean done;
-
-    private @Nullable MessageExecutorException exception;
 
     protected MessageExecutor(@NotNull Database database, @NotNull Message.Input message) {
         this.database = database;
         this.message = message;
-    }
-
-    public boolean isDone() {
-        return done;
-    }
-
-    public boolean isCompleteSuccessfully() {
-        return isDone() && getException() == null;
-    }
-
-    /**
-     * @return The {@link MessageExecutorException} or {@code null} if the execute method doest not completed exceptionally
-     * or if never even invoked
-     * */
-    public @Nullable MessageExecutorException getException() {
-        return exception;
     }
 
     /**
@@ -51,9 +32,10 @@ public abstract class MessageExecutor {
      *
      * <p>The future will always completed with {@link MessageExecutorException} if some error occurs.
      *
-     * @param channel The channel used to update the message buffer if needed.
+     * @param buffer the buffer used to make operations
+     * @param channel The channel used to update the buffer if needed.
      * */
-    public abstract @NotNull CompletableFuture<Void> execute(@Nullable ReadableByteChannel channel);
+    public abstract @NotNull CompletableFuture<Void> execute(@NotNull ByteBuffer buffer, @NotNull ReadableByteChannel channel);
 
     // Native
 
@@ -61,11 +43,11 @@ public abstract class MessageExecutor {
     public boolean equals(Object object) {
         if (object == null || getClass() != object.getClass()) return false;
         @NotNull MessageExecutor executor = (MessageExecutor) object;
-        return done == executor.done && message.getCode() == executor.message.getCode() && Objects.equals(exception, executor.exception);
+        return message.getCode() == executor.message.getCode();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(message, done, exception);
+        return Objects.hashCode(message.getCode());
     }
 }

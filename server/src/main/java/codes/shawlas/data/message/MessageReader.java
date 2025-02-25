@@ -49,7 +49,7 @@ public abstract class MessageReader {
      * A {@link CompletableFuture} async method for read the message.
      *
      * <p>The future will always completed with {@link Message.Input} if no problems occurs,
-     * or with {@link MessageReaderException} if some error occurs*
+     * or with {@link MessageReaderException} if some error occurs.
      * */
     public abstract @NotNull CompletableFuture<Message.Input> nextMessage();
 

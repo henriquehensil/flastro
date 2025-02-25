@@ -98,7 +98,7 @@ final class ConnectionThread extends Thread {
                 }
 
                 // Call the message executor
-                input.getExecutor(database).execute(channel).whenComplete((result, e2) -> {
+                input.getExecutor(database).execute(buffer, channel).whenComplete((result, e2) -> {
                     if (e2 != null) {
                         output.set(new ExceptionMessage(UUID.randomUUID(), input, e2.getCause()));
                     } else {

@@ -1,4 +1,6 @@
-package codes.shawlas.data.database;
+package codes.shawlas.data.impl.database;
+
+import codes.shawlas.data.database.Database;
 
 import codes.shawlas.data.impl.FileStorage;
 import codes.shawlas.data.storage.Storage;

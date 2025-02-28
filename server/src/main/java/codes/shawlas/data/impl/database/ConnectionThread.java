@@ -1,12 +1,7 @@
-package codes.shawlas.data.database;
+package codes.shawlas.data.impl.database;
 
-import codes.shawlas.data.exception.message.MessageReaderException;
-import codes.shawlas.data.exception.message.NoSuchReaderException;
-import codes.shawlas.data.database.DatabaseImpl.ConnectionImpl;
-import codes.shawlas.data.message.Message;
-import codes.shawlas.data.message.MessageReader;
-import codes.shawlas.data.message.content.ExceptionMessage;
-import codes.shawlas.data.message.content.SuccessMessage;
+import codes.shawlas.data.exception.IllegalMessageException;
+import codes.shawlas.data.message.MessageProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,7 +9,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.*;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.concurrent.CompletableFuture;
+
+import codes.shawlas.data.impl.database.DatabaseImpl.ConnectionImpl;
 
 final class ConnectionThread extends Thread {
 
@@ -59,9 +56,29 @@ final class ConnectionThread extends Thread {
                 }
 
                 if (key.isReadable()) {
-                    read(key);
+
                 }
             }
+        }
+    }
+
+    private void read(@NotNull SelectionKey key) {
+        @NotNull SocketChannel channel = (SocketChannel) key.channel();
+        @NotNull ByteBuffer buffer = ByteBuffer.allocate(4196);
+
+        try {
+            int read = channel.read(buffer);
+
+            if (read == -1) {
+                throw new ClosedChannelException();
+            }
+
+            CompletableFuture.runAsync(() -> MessageProvider.deserialize(buffer).execute(database, buffer, channel));
+
+        } catch (ClosedChannelException | IllegalMessageException e) {
+            close(channel);
+        } catch (IOException ignore) {
+            // todo Exception Message
         }
     }
 
@@ -75,51 +92,6 @@ final class ConnectionThread extends Thread {
             if (client != null) {
                 close(client);
             }
-        }
-    }
-
-    private void read(@NotNull SelectionKey key) {
-        @NotNull SocketChannel channel = (SocketChannel) key.channel();
-        @NotNull ByteBuffer buffer = ByteBuffer.allocate(8192);
-
-        try {
-            int read = channel.read(buffer);
-
-            if (read == -1) {
-                throw new ClosedChannelException();
-            }
-
-            @NotNull AtomicReference<Message.@NotNull Output> output = new AtomicReference<>();
-
-            // Call the message reader
-            MessageReader.getInstance(buffer).nextMessage().whenComplete((input, e1) -> {
-                if (e1 != null) {
-                    throw (MessageReaderException) e1.getCause();
-                }
-
-                // Call the message executor
-                input.getExecutor(database).execute(buffer, channel).whenComplete((result, e2) -> {
-                    if (e2 != null) {
-                        output.set(new ExceptionMessage(UUID.randomUUID(), input, e2.getCause()));
-                    } else {
-                        output.set(new SuccessMessage(UUID.randomUUID(), input, "Operation has been successfully"));
-                    }
-                });
-
-                try {
-                    channel.write(output.get().serialize());
-                } catch (IOException ignored) {
-                    // todo Exception Message
-                }
-
-            });
-        } catch (NoSuchReaderException | MessageReaderException e) {
-            // todo Disconnect message
-            close(channel);
-        } catch (ClosedChannelException e) {
-            close(channel);
-        } catch (IOException ignored) {
-            // todo Exception Message
         }
     }
 

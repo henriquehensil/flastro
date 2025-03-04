@@ -4,13 +4,13 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>codes.shawlas</groupId>
-    <artifactId>jdata</artifactId>
+    <groupId>com.henrique.gustavo</groupId>
+    <artifactId>flastro</artifactId>
     <version>1.0</version>
     <packaging>pom</packaging>
+
     <modules>
-        <module>core</module>
-        <module>server</module>
+        <module>api</module>
     </modules>
 
     <dependencies>
@@ -45,8 +45,8 @@
     </dependencies>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

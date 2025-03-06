@@ -1,9 +1,10 @@
 package com.henrique.gustavo.flastro.management;
 
 import com.henrique.gustavo.flastro.permission.Permission;
-import com.henrique.gustavo.flastro.permission.Permissions;
 import com.henrique.gustavo.flastro.user.User;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Collection;
 
 public interface PermissionsManagement extends Management {
 
@@ -13,17 +14,11 @@ public interface PermissionsManagement extends Management {
 
     void put(@NotNull User user, @NotNull Permission permission);
 
-    void putAll(@NotNull User user, @NotNull Permissions permissions);
-
     void remove(@NotNull User user, @NotNull Permission permission);
 
-    void removeAll(@NotNull User user, @NotNull Permissions permissions);
+    void putAll(@NotNull User user, @NotNull Collection<@NotNull Permission> permissions);
 
-    boolean has(@NotNull User user, @NotNull Permission permission);
-
-    boolean containsAll(@NotNull User user, @NotNull Permissions permissions);
-
-    // Name
+    void removeAll(@NotNull User user, @NotNull Collection<@NotNull Permission> permissions);
 
     @Override
     default @NotNull String getName() {

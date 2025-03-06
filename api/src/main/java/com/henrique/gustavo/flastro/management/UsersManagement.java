@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public interface UserManagement extends Management {
+public interface UsersManagement extends Management {
 
     @NotNull User create(@NotNull UUID uuid, @NotNull String name, char @NotNull [] password);
 
@@ -25,10 +25,13 @@ public interface UserManagement extends Management {
 
     boolean remove(@NotNull UUID id);
 
-    // Name
+    void setName(@NotNull User user, @NotNull String name);
+
+    void setPassword(@NotNull User user, char @NotNull [] password);
 
     @Override
     default @NotNull String getName() {
         return "User Management";
     }
+
 }

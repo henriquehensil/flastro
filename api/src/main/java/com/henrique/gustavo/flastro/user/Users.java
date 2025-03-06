@@ -1,6 +1,5 @@
-package com.henrique.gustavo.flastro.management;
+package com.henrique.gustavo.flastro.user;
 
-import com.henrique.gustavo.flastro.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
@@ -9,7 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-public interface UsersManagement extends Management {
+public interface Users {
 
     @NotNull User create(@NotNull UUID uuid, @NotNull String name, char @NotNull [] password);
 
@@ -28,10 +27,5 @@ public interface UsersManagement extends Management {
     void setName(@NotNull User user, @NotNull String name);
 
     void setPassword(@NotNull User user, char @NotNull [] password);
-
-    @Override
-    default @NotNull String getName() {
-        return "User Management";
-    }
 
 }

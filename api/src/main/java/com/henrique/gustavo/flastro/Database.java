@@ -29,32 +29,6 @@ public interface Database {
 
         // Static initializers
 
-        static @NotNull Authentication create(@NotNull InetAddress address, int port) {
-            if (port < 0 || port > 65535) throw new IllegalArgumentException("Illegal port value");
-
-            return new Authentication() {
-                @Override
-                public @NotNull InetAddress getAddress() {
-                    return address;
-                }
-
-                @Override
-                public @NotNull String getUsername() {
-                    return "";
-                }
-
-                @Override
-                public @NotNull String getPassword() {
-                    return "";
-                }
-
-                @Override
-                public @Range(from = 0, to = 65535) int getPort() {
-                    return port;
-                }
-            };
-        }
-
         static @NotNull Authentication create(@NotNull InetAddress address, int port, @NotNull String username, @NotNull String password) {
             if (port < 0 || port > 65535) throw new IllegalArgumentException("Illegal port value");
 

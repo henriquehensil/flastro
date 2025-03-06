@@ -9,12 +9,12 @@
         <version>1.0</version>
     </parent>
 
-    <artifactId>api</artifactId>
-    <version>1.0</version>
+    <groupId>com.henriquegustavo.flasto</groupId>
+    <artifactId>core</artifactId>
 
     <properties>
-        <maven.compiler.source>8</maven.compiler.source>
-        <maven.compiler.target>8</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 

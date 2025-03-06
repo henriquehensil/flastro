@@ -11,9 +11,9 @@ public interface User {
 
     @NotNull String getName();
 
-    boolean has(@NotNull Permission permission);
-
     char @NotNull [] getPassword();
+
+    boolean has(@NotNull Permission permission);
 
     default boolean isRoot() {
        return this instanceof Root;

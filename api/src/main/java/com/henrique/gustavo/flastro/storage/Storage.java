@@ -6,4 +6,6 @@ public interface Storage {
 
     @NotNull String getId();
 
+    byte getCode();
+
 }

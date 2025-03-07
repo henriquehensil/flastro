@@ -11,12 +11,14 @@ public interface Permissions {
 
     @NotNull Permission get(byte code);
 
-    void put(@NotNull User user, @NotNull Permission permission);
+    void put(@NotNull Permission permission, @NotNull User user);
 
-    void remove(@NotNull User user, @NotNull Permission permission);
+    void remove(@NotNull Permission permission, @NotNull User user);
 
-    void putAll(@NotNull User user, @NotNull Collection<@NotNull Permission> permissions);
+    void putAll(@NotNull Collection<@NotNull Permission> permissions, @NotNull User user);
 
-    void removeAll(@NotNull User user, @NotNull Collection<@NotNull Permission> permissions);
+    void removeAll(@NotNull Collection<@NotNull Permission> permissions, @NotNull User user);
+
+    boolean has(@NotNull Permission permission, @NotNull User user);
 
 }

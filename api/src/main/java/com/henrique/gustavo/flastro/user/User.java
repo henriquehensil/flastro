@@ -13,8 +13,6 @@ public interface User {
 
     char @NotNull [] getPassword();
 
-    boolean has(@NotNull Permission permission);
-
     default boolean isRoot() {
        return this instanceof Root;
     }

@@ -12,6 +12,14 @@
     <groupId>com.henriquegustavo.flasto</groupId>
     <artifactId>core</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.henriquegustavo.flastro</groupId>
+            <artifactId>api</artifactId>
+            <version>1.0</version>
+        </dependency>
+    </dependencies>
+
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>

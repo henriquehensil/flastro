@@ -9,6 +9,7 @@
         <version>1.0</version>
     </parent>
 
+    <groupId>com.henriquegustavo.flastro</groupId>
     <artifactId>api</artifactId>
     <version>1.0</version>
 

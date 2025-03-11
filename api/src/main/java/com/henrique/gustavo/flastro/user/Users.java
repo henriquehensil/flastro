@@ -10,7 +10,7 @@ import java.util.UUID;
 
 public interface Users {
 
-    @NotNull User create(@NotNull UUID uuid, @NotNull String name, char @NotNull [] password);
+    @NotNull User create(@NotNull String name, char @NotNull [] password);
 
     @NotNull Optional<@NotNull User> get(@NotNull UUID id);
 
@@ -20,12 +20,22 @@ public interface Users {
 
     @Unmodifiable @NotNull Collection<@NotNull User> getAll();
 
-    boolean remove(@NotNull User user);
-
     boolean remove(@NotNull UUID id);
 
-    void setName(@NotNull User user, @NotNull String name);
+    boolean setName(@NotNull UUID id, @NotNull String name);
 
-    void setPassword(@NotNull User user, char @NotNull [] password);
+    boolean setPassword(@NotNull UUID id, char @NotNull [] password);
+
+    default boolean remove(@NotNull User user) {
+        return remove(user.getId());
+    }
+
+    default boolean setName(@NotNull User user, @NotNull String name) {
+        return setName(user.getId(), name);
+    }
+
+    default boolean setPassword(@NotNull User user, char @NotNull [] password) {
+        return setPassword(user.getId(), password);
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.henrique.gustavo.flastro;
 
+import com.henrique.gustavo.flastro.storage.Storages;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
@@ -12,6 +13,8 @@ public interface Database {
     @NotNull Authentication getAuthentication();
 
     @NotNull Connection getConnection();
+
+    @NotNull Storages getStorages();
 
     // Classes
 

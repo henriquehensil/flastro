@@ -7,7 +7,6 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public final class UsersImpl implements Users {
 
@@ -27,8 +26,9 @@ public final class UsersImpl implements Users {
     private @NotNull UUID generate() {
         @NotNull UUID uuid = UUID.randomUUID();
 
-        while (userMap.containsKey(uuid))
+        while (userMap.containsKey(uuid)) {
             uuid = UUID.randomUUID();
+        }
 
         return uuid;
     }
@@ -36,16 +36,6 @@ public final class UsersImpl implements Users {
     @Override
     public @NotNull Optional<@NotNull User> get(@NotNull UUID id) {
         return Optional.ofNullable(userMap.get(id));
-    }
-
-    @Override
-    public @NotNull Set<@NotNull User> get(@NotNull String name) {
-        return getAll().stream().filter(u -> u.getName().toLowerCase().contains(name.toLowerCase())).collect(Collectors.toSet());
-    }
-
-    @Override
-    public @NotNull Set<@NotNull User> get(char @NotNull [] password) {
-        return getAll().stream().filter(u -> Arrays.equals(u.getPassword(), password)).collect(Collectors.toSet());
     }
 
     @Override

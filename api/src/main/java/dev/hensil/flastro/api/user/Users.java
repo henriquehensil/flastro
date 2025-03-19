@@ -1,7 +1,7 @@
-package com.henriquegustavo.flastro.user;
+package dev.hensil.flastro.api.user;
 
-import com.henriquegustavo.flastro.exception.NoSuchUserPermissionsException;
-import com.henriquegustavo.flastro.permission.UserPermissions;
+import dev.hensil.flastro.api.exception.NoSuchUserPermissionsException;
+import dev.hensil.flastro.api.permission.UserPermissions;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 

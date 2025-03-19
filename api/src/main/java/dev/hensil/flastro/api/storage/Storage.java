@@ -1,4 +1,4 @@
-package com.henrique.gustavo.flastro.storage;
+package dev.hensil.flastro.api.storage;
 
 import org.jetbrains.annotations.NotNull;
 

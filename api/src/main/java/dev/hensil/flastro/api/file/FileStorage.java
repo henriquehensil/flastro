@@ -11,13 +11,11 @@ public interface FileStorage extends Storage {
 
     @NotNull Path getRoot();
 
-    @NotNull FileManager getFileManager();
-
-    @NotNull FileData getFileData();
+    @NotNull Manager getManager();
 
     // Classes
 
-    interface FileManager {
+    interface Manager {
 
         @NotNull MetaFile create(@NotNull Path path) throws IOException;
 
@@ -26,16 +24,6 @@ public interface FileStorage extends Storage {
         boolean delete(@NotNull Path path);
 
         boolean contains(@NotNull Path path);
-
-    }
-
-    interface FileData {
-
-        @NotNull InputStream getInputStream(@NotNull Path path) throws FileNotFoundException;
-
-        @NotNull OutputStream getOutputStream(@NotNull Path path, boolean appends) throws FileNotFoundException;
-
-        @NotNull FileChannel getChannel(@NotNull Path path) throws FileNotFoundException;
 
     }
 }

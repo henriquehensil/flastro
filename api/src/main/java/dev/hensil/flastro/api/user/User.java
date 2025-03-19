@@ -1,4 +1,4 @@
-package com.henrique.gustavo.flastro.user;
+package dev.hensil.flastro.api.user;
 
 import org.jetbrains.annotations.NotNull;
 

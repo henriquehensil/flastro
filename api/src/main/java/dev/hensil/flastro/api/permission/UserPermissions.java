@@ -1,12 +1,12 @@
-package com.henriquegustavo.flastro.permission;
+package dev.hensil.flastro.api.permission;
 
-import com.henriquegustavo.flastro.exception.NoSuchUserException;
-import com.henriquegustavo.flastro.user.User;
-import com.henriquegustavo.flastro.user.Users;
+import dev.hensil.flastro.api.exception.NoSuchUserException;
+import dev.hensil.flastro.api.user.User;
+import dev.hensil.flastro.api.user.Users;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Unmodifiable;
 
-import java.util.Collection;
+import java.util.Set;
 
 public interface UserPermissions {
 
@@ -19,11 +19,10 @@ public interface UserPermissions {
 
     boolean remove(@NotNull User user);
 
+    @Unmodifiable @NotNull Set<@NotNull User> getUsers();
+
     default boolean has(@NotNull User user) {
         return getUsers().contains(user);
     }
-
-    @Unmodifiable
-    @NotNull Collection<@NotNull User> getUsers();
 
 }

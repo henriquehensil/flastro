@@ -6,13 +6,21 @@ import org.jetbrains.annotations.Range;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
 
 public interface MetaFile {
 
+    @NotNull Path getPath();
+
+    boolean isDirectory();
+
     @NotNull MetaFile.Data getData();
 
     @NotNull MetaFile.Time getTime();
+
+    @NotNull MetaFile.Attributes getAttributes();
 
     // Classes
 
@@ -35,4 +43,11 @@ public interface MetaFile {
         @NotNull FileTime getCreation();
 
     }
+
+    interface Attributes {
+
+        @NotNull BasicFileAttributes get();
+
+    }
+
 }

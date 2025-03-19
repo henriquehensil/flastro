@@ -1,5 +1,6 @@
-package com.henriquegustavo.flastro.storage;
+package dev.hensil.flastro.api.file;
 
+import dev.hensil.flastro.api.storage.Storage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;

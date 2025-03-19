@@ -1,4 +1,4 @@
-package com.henriquegustavo.flastro.exception;
+package dev.hensil.flastro.api.exception;
 
 import java.util.NoSuchElementException;
 

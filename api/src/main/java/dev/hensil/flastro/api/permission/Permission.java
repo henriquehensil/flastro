@@ -1,4 +1,4 @@
-package com.henrique.gustavo.flastro.permission;
+package dev.hensil.flastro.api.permission;
 
 import org.jetbrains.annotations.NotNull;
 
@@ -57,10 +57,10 @@ public interface Permission {
 
     // Objects
 
+    byte getCode();
+
     @NotNull String getName();
 
     @NotNull String getDescription();
-
-    byte getCode();
 
 }

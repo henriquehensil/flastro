@@ -1,12 +1,14 @@
-package com.henrique.gustavo.flastro;
+package dev.hensil.flastro.api;
 
-import com.henrique.gustavo.flastro.storage.Storages;
+import dev.hensil.flastro.api.storage.Storages;
+import dev.hensil.flastro.api.user.Root;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 public interface Database {
 
@@ -15,6 +17,8 @@ public interface Database {
     @NotNull Connection getConnection();
 
     @NotNull Storages getStorages();
+
+    @NotNull Root getRoot();
 
     // Classes
 
@@ -54,6 +58,30 @@ public interface Database {
                 @Override
                 public @Range(from = 0, to = 65535) int getPort() {
                     return port;
+                }
+            };
+        }
+
+        static @NotNull Authentication create(@NotNull InetSocketAddress address, @NotNull String username, @NotNull String password) {
+            return new Authentication() {
+                @Override
+                public @NotNull InetAddress getAddress() {
+                    return address.getAddress();
+                }
+
+                @Override
+                public @NotNull String getUsername() {
+                    return password;
+                }
+
+                @Override
+                public @NotNull String getPassword() {
+                    return username;
+                }
+
+                @Override
+                public @Range(from = 0, to = 65535) int getPort() {
+                    return address.getPort();
                 }
             };
         }

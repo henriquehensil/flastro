@@ -4,7 +4,6 @@ import dev.hensil.flastro.api.storage.Storage;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
-import java.nio.channels.FileChannel;
 import java.nio.file.Path;
 
 public interface FileStorage extends Storage {

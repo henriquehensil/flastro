@@ -41,6 +41,7 @@ public interface MetaFile {
 
         @NotNull BasicFileAttributes get();
 
-    }
+        boolean isCompressed();
 
+    }
 }

@@ -6,6 +6,7 @@ import java.nio.file.attribute.PosixFileAttributes;
 
 public interface PosixMetaFile extends MetaFile {
 
+    @Override
     @NotNull PosixAttributes getAttributes();
 
     // Classes

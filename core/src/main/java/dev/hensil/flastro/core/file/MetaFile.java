@@ -1,73 +1,37 @@
 package dev.hensil.flastro.core.file;
 
-import dev.hensil.flastro.core.user.User;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.net.URI;
-import java.nio.file.Path;
 import java.time.Instant;
+import java.util.Optional;
 
 public interface MetaFile {
 
-    // Objects
+    @NotNull String getName();
 
-    @NotNull General getGeneral();
+    @NotNull URI getURI();
 
-    @NotNull Periods getPeriods();
+    @NotNull Instant getCreated();
 
-    @NotNull Content getContent();
+    @NotNull Optional<@NotNull Instant> getLastWritten();
 
-    byte @NotNull [] toBytes();
+    @NotNull Optional<@NotNull Instant> getLastRead();
+
+    @NotNull Optional<@NotNull FolderContent> getFolderContent();
+
+    @Range(from = 0, to = Long.MAX_VALUE) long size();
+
+    @Range(from = 0, to = Long.MAX_VALUE) int compressedSize();
 
     // Classes
 
-    interface General {
+    interface FolderContent {
 
-        @NotNull String getName();
+        @Range(from = 0, to = Long.MAX_VALUE) int getAllFiles();
 
-        @NotNull URI getURI();
+        @Range(from = 0, to = Long.MAX_VALUE) int getAllFolders();
 
-        boolean isFolder();
-
-    }
-
-    interface Periods {
-
-        @NotNull Time creation();
-
-        @Nullable Time lastWritten();
-
-        @Nullable Time lastRead();
-
-        // Classes
-
-        interface Time {
-
-            @NotNull Instant getInstant();
-
-            @NotNull User getUser();
-
-        }
-    }
-
-    interface Content {
-
-        @Range(from = 0, to = Long.MAX_VALUE) long size();
-
-        @Range(from = 0, to = Long.MAX_VALUE) int compressedSize();
-
-        @Nullable Folder getFolderContent();
-
-        // Classes
-
-        interface Folder {
-
-            @Range(from = 0, to = Long.MAX_VALUE) int getAllFiles();
-
-            @Range(from = 0, to = Long.MAX_VALUE) int getAllFolders();
-
-        }
     }
 }

@@ -1,63 +1,57 @@
 package dev.hensil.flastro.core.file;
 
-import dev.hensil.flastro.core.exception.file.FileStorageException;
 import dev.hensil.flastro.core.storage.Storage;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
+import java.net.URI;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
-import java.util.function.Predicate;
+
+import java.io.IOException;
+import java.util.Optional;
 
 public interface FileStorage extends Storage {
 
-    @NotNull Path getRootLocation();
-
     @NotNull Manager getManager();
-
-    @NotNull Writer getWriter(@NotNull Path path, boolean append);
-
-    @NotNull Reader getReader(@NotNull Path path);
 
     // Classes
 
     interface Manager {
 
-        @NotNull MetaFile createFile(@NotNull Path location, @NotNull String name, boolean mkdirs) throws FileStorageException;
+        // Objects
 
-        @NotNull MetaFile createFolder(@NotNull Path location, @NotNull String name, boolean mkdirs) throws FileStorageException;
+        default @NotNull Path getRootPath() {
+            return Paths.get("/");
+        }
 
-        @NotNull MetaFile get(@NotNull Path path) throws FileStorageException;
+        @NotNull MetaFile createFile(@NotNull Path parents, @NotNull String name, boolean mkdirs) throws IOException;
 
-        boolean delete(@NotNull Path path);
+        @NotNull MetaFile createFolder(@NotNull Path parents, @NotNull String name, boolean mkdirs) throws IOException;
 
-        boolean deleteAll(@NotNull Path @NotNull ... paths);
+        @NotNull Optional<@NotNull MetaFile> get(@NotNull URI uri);
 
-        boolean deleteAll(@NotNull Path path);
+        /**
+         * @throws java.nio.file.NoSuchFileException if the file doest not exists.
+         * @throws java.nio.file.NotDirectoryException if the file exists, but is a folder.
+         * @throws IOException if another error occurs.
+         * */
+        void deleteFile(@NotNull URI uri) throws IOException;
 
-        boolean deleteIf(@NotNull Path location, @NotNull Predicate<? extends @NotNull MetaFile> predicate);
+        /**
+         * @throws java.nio.file.NoSuchFileException if the folder doest not exists.
+         * @throws java.nio.file.NotDirectoryException if is not a folder.
+         * @throws IOException if another error occurs.
+         * */
+        void deleteFolder(@NotNull URI uri, boolean onlyIfIsEmpty) throws IOException;
 
-        @NotNull Collection<? extends @NotNull MetaFile> getFiles(@NotNull Path location) throws FileStorageException;
+        void move(@NotNull URI uri, @NotNull Path target, boolean mkdirs) throws IOException;
 
-        void move(@NotNull Path location, @NotNull Path target) throws FileStorageException;
+        void copy(@NotNull URI uri, @NotNull Path target, boolean mkdirs) throws IOException;
 
-        void copy(@NotNull Path location, @NotNull Path target) throws FileStorageException;
+        void rename(@NotNull URI uri, @NotNull String newName) throws IOException;
 
-        void rename(@NotNull Path path, @NotNull String newName) throws FileStorageException;
-
-        boolean contains(@NotNull Path path);
-
-    }
-
-    interface Writer {
-
-        int write(@NotNull ByteBuffer buffer) throws FileStorageException;
-
-    }
-
-    interface Reader {
-
-        int read(@NotNull ByteBuffer buffer) throws FileStorageException;
+        @NotNull Collection<? extends @NotNull MetaFile> getFiles(@NotNull Path location) throws IOException;
 
     }
 }

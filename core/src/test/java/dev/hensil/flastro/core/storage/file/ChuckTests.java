@@ -88,29 +88,14 @@ final class ChuckTests {
 
         byte @NotNull [] data = "hi".getBytes();
         @NotNull Chunk.Block nonExistentBlock = anotherChunk.write(data);
+
         Assertions.assertThrows(NoSuchBlockException.class, () -> this.chunk.delete(nonExistentBlock));
 
         @NotNull Chunk.Block block = this.chunk.write(data);
         Assertions.assertNotEquals(nonExistentBlock, block);
-        Assertions.assertThrows(NoSuchBlockException.class, () -> this.chunk.delete(nonExistentBlock));
-    }
+        Assertions.assertDoesNotThrow(() -> this.chunk.delete(block));
 
-    @Test
-    @DisplayName("When a block is deleted, a new suppressed block is created")
-    public void newSuppressedBlock() throws IOException {
-        @NotNull Chunk.Block block = chunk.write("hello".getBytes());
-        Assertions.assertFalse(chunk.hasSuppressed());
-
-        @NotNull Chunk.Block suppressed = chunk.delete(block);
-        Assertions.assertTrue(chunk.hasSuppressed());
-        Assertions.assertNotEquals(block, suppressed);
-
-        Assertions.assertEquals(block.getChunk(), suppressed.getChunk());
-        Assertions.assertEquals(block.index(), suppressed.index());
-        Assertions.assertEquals(block.length(), suppressed.length());
-        Assertions.assertNotEquals(block.isSuppressed(), suppressed.isSuppressed());
-
-        Assertions.assertTrue(suppressed.isSuppressed());
+        anotherChunk.deleteFile();
     }
 
     @Test
@@ -134,11 +119,27 @@ final class ChuckTests {
         byte @NotNull [] written = Files.readAllBytes(chunk.getPath());
         Assertions.assertFalse(Arrays.equals(data, written));
         Assertions.assertTrue(Arrays.compare(written, data) < 0);
+
+        Assertions.assertTrue(block.length() < data.length);
     }
 
     @Test
     @DisplayName("Suppressed blocks can be rewrite only when the capacity and the data is equals or greater")
-    public void rewriteCapacity() {
+    public void rewriteCapacity() throws IOException {
+        byte @NotNull [] data = "hello".getBytes();
+
+        @NotNull Chunk.Block block = chunk.delete(chunk.write(data));
+        Assertions.assertEquals(block.length(), data.length);
+
+        data = "hi".getBytes(); // less
+        Assertions.assertFalse(block.canRewrite(data));
+
+        try {
+            chunk.rewrite(data);
+            Assertions.fail("Data is less that suppressed block length");
+        } catch (NoSuchSuppressedBlockException ignore) {
+            // Yes
+        }
     }
 
     @Test
@@ -150,17 +151,45 @@ final class ChuckTests {
     }
 
     @Test
-    public void canRewrite() throws IOException {
+    public void rewrite() throws IOException {
         byte @NotNull [] data = "hello".getBytes();
+        @NotNull Chunk.Block supressedBlock = chunk.delete(chunk.write(data));
 
-        @NotNull Chunk.Block block = chunk.write(data);
-        Assertions.assertFalse(block.canWrite(data));
+        Assertions.assertEquals(data.length, chunk.size());
 
-        @NotNull Chunk.Block suppressed = chunk.delete(block);
-        Assertions.assertFalse(suppressed.canWrite("".getBytes())); // less
+        Assertions.assertTrue(supressedBlock.isSuppressed());
+        Assertions.assertTrue(chunk.hasSuppressed());
 
-        Assertions.assertTrue(suppressed.canWrite("hello world".getBytes())); // more
-        Assertions.assertTrue(suppressed.canWrite(data));
+        byte @NotNull [] newData = "follow".getBytes();
+
+        @NotNull Chunk.Block block = chunk.rewrite(data);
+        Assertions.assertFalse(block.isSuppressed());
+        Assertions.assertEquals(block.index(), supressedBlock.index());
+        Assertions.assertEquals(block.length(), supressedBlock.length());
+
+        Assertions.assertEquals(data.length, chunk.size());
+        Assertions.assertNotEquals(newData.length, chunk.size());
+    }
+
+    @Test
+    public void rewriteData() throws IOException {
+        @NotNull String data = "hello";
+
+        @NotNull Chunk.Block block = chunk.write(data.getBytes());
+        chunk.write(data.getBytes());
+
+        byte @NotNull [] read = Files.readAllBytes(chunk.getPath());
+        Assertions.assertArrayEquals(read, (data + data).getBytes());
+
+        chunk.delete(block);
+
+        @NotNull String anotherData = "seven";
+        chunk.rewrite(anotherData.getBytes());
+
+        read = Files.readAllBytes(chunk.getPath());
+        Assertions.assertFalse(Arrays.equals(read, (data + data).getBytes()));
+
+        Assertions.assertArrayEquals(read, (anotherData + data).getBytes());
     }
 
     // Classes
@@ -168,10 +197,7 @@ final class ChuckTests {
     @Nested
     final class BlockTests {
 
-        private final @NotNull Path path = VAR.resolve("chunk.block-file-test.dat");
-        private final @NotNull Chunk chunk = Chunk.recentChuck(path);
-
-        BlockTests() throws IOException {
+        private BlockTests() {
         }
 
         @Test
@@ -198,7 +224,7 @@ final class ChuckTests {
             @NotNull Chunk.Block block = chunk.write("hello".getBytes());
             Assertions.assertEquals(offset, block.index());
 
-            offset += (data.length -1) + 1;
+            offset += chunk.size();
 
             block = chunk.write(data);
             Assertions.assertEquals(offset, block.index());
@@ -214,6 +240,38 @@ final class ChuckTests {
             Assertions.assertEquals(toMegaBytes(16), block.length());
 
             Assertions.assertEquals(Files.size(chunk.getPath()), toMegaBytes(16));
+        }
+
+        @Test
+        @DisplayName("When a block is deleted, a new suppressed block is created")
+        public void newSuppressedBlock() throws IOException {
+            @NotNull Chunk.Block block = chunk.write("hello".getBytes());
+            Assertions.assertFalse(chunk.hasSuppressed());
+
+            @NotNull Chunk.Block suppressed = chunk.delete(block);
+            Assertions.assertTrue(chunk.hasSuppressed());
+            Assertions.assertNotEquals(block, suppressed);
+
+            Assertions.assertEquals(block.getChunk(), suppressed.getChunk());
+            Assertions.assertEquals(block.index(), suppressed.index());
+            Assertions.assertEquals(block.length(), suppressed.length());
+            Assertions.assertNotEquals(block.isSuppressed(), suppressed.isSuppressed());
+
+            Assertions.assertTrue(suppressed.isSuppressed());
+        }
+
+        @Test
+        public void canRewrite() throws IOException {
+            byte @NotNull [] data = "hello".getBytes();
+
+            @NotNull Chunk.Block block = chunk.write(data);
+            Assertions.assertFalse(block.canRewrite(data));
+
+            @NotNull Chunk.Block suppressed = chunk.delete(block);
+            Assertions.assertFalse(suppressed.canRewrite("".getBytes())); // less
+
+            Assertions.assertTrue(suppressed.canRewrite("hello world".getBytes())); // more
+            Assertions.assertTrue(suppressed.canRewrite(data));
         }
     }
 }

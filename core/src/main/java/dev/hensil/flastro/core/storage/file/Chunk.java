@@ -24,7 +24,7 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
     static @NotNull Chunk recentChuck(@NotNull Path path) throws IOException {
         return new Chunk(
                 path,
-                new LinkedHashSet<>(512, 0.5f),
+                new HashSet<>(512, 0.5f),
                 new RandomAccessFile(path.toString(), "rwd"),
                 0,
                 false
@@ -33,24 +33,25 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
 
     // Objects
 
+    // Todo synchronized
+
     private final @NotNull Path path;
     private final @NotNull Set<@NotNull Block> blocks;
-
     private final @NotNull RandomAccessFile file;
-    private int size;
 
-    private volatile int offset;
+    private int size;
     private volatile boolean suppressed;
 
     private Chunk(
             @NotNull Path path,
             @NotNull Set<@NotNull Block> blocks,
             @NotNull RandomAccessFile file,
-            int offset,
+            int size,
             boolean hasSuppressed
     )
             throws IOException
     {
+        this.size = size;
         if (!Files.exists(path)) {
             Files.createDirectories(path);
         } else if (!Files.isRegularFile(path)) {
@@ -59,10 +60,9 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
 
         this.path = path;
         this.blocks = blocks;
-        this.offset = offset;
 
         this.file = file;
-        this.file.seek(offset);
+        this.file.seek(size);
 
         this.suppressed = hasSuppressed;
     }
@@ -71,10 +71,91 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
         return path;
     }
 
-    public boolean has(@NotNull Block block) {
-        synchronized (this) {
-            return blocks.contains(block);
+    public @NotNull Block write(byte @NotNull [] data) throws IOException {
+        if (isFull()) {
+            throw new FullChunkException("The chunk is already full: " + size);
         }
+
+        int length = Math.min(getRemaining(), Math.min(data.length, Block.MAX_SIZE));
+        int start = size;
+
+        write(data, size, length);
+
+        @NotNull Block block = new Block(this, start, length, false);
+        blocks.add(block);
+        return block;
+    }
+
+    public @NotNull Block rewrite(byte @NotNull [] data) throws IOException {
+        if (!hasSuppressed()) {
+            throw new NoSuchSuppressedBlockException("No suppressed block");
+        }
+
+        @NotNull Set<@NotNull Block> suppressedBlocks = getSuppressedBlocks();
+
+        for (@NotNull Block sb : suppressedBlocks) {
+            if (sb.canRewrite(data)) {
+                write(data, sb.index, sb.length);
+
+                @NotNull Block newBlock = new Block(this, sb.index, sb.length, false);
+                blocks.add(newBlock);
+                blocks.remove(sb);
+
+                if (suppressedBlocks.size() == 1) {
+                    this.suppressed = false;
+                }
+
+                return newBlock;
+            }
+        }
+
+        throw new NoSuchSuppressedBlockException("Cannot find the ideal suppressed block");
+    }
+
+    public @NotNull Block delete(@NotNull Block block) {
+        if (!has(block)) {
+            throw new NoSuchBlockException("Non-member block: " + block);
+        } else if (block.isSuppressed()) {
+            throw new SuppressedBlockException("This block is already suppressed: " + block);
+        } else {
+            @NotNull Block suppressedBlock = new Block(this, block.index, block.length, true);
+
+            if (!suppressed) {
+                suppressed = true;
+            }
+
+            blocks.remove(block);
+            blocks.add(suppressedBlock);
+
+            return suppressedBlock;
+        }
+    }
+
+    private void write(byte @NotNull [] data, int index, int length) throws IOException {
+        if (length > Block.MAX_SIZE) {
+            throw new IOException("length is greater that block max size");
+        } else if (length > (Chunk.MAX_SIZE - index)) {
+            throw new IOException("Length is greater that chunk max size");
+        } else if (index > size) {
+            throw new IOException("Cannot skip positions");
+        } else {
+            boolean isRandom = index != size;
+            if (isRandom) {
+                file.seek(index);
+            }
+            file.write(data, 0, length);
+            if (!isRandom) {
+                size = (int) file.length();
+            }
+        }
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public boolean has(@NotNull Block block) {
+        return blocks.contains(block);
     }
 
     public boolean isFull() {
@@ -85,85 +166,8 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
         return size == 0;
     }
 
-    public int size() {
-        return size;
-    }
-
     public int getRemaining() {
-        return MAX_SIZE - size;
-    }
-
-    public @NotNull Block write(byte @NotNull [] data) throws IOException {
-        if (isFull()) {
-            throw new FullChunkException("The chunk is already full: " + size);
-        }
-
-        int lastIndex = offset;
-        writeData(data);
-        int length = offset - lastIndex;
-
-        synchronized (this) {
-            @NotNull Block block = new Block(this, lastIndex, length, false);
-            blocks.add(block);
-            return block;
-        }
-    }
-
-    public @NotNull Block rewrite(byte @NotNull [] data) throws IOException {
-        synchronized (this) {
-            if (!hasSuppressed()) {
-                throw new NoSuchSuppressedBlockException("No suppressed block");
-            }
-
-            @NotNull Set<@NotNull Block> suppressedBlocks = getSuppressedBlocks();
-
-            for (@NotNull Block block : suppressedBlocks) {
-                if (block.canWrite(data)) {
-                    file.seek(block.index);
-                    file.write(data, 0, block.length);
-                    offset = (int) file.getFilePointer();
-
-                    @NotNull Block b = new Block(this, offset, block.length, false);
-                    blocks.remove(block);
-                    blocks.add(b);
-
-                    if (suppressedBlocks.size() == 1) {
-                        suppressed = false;
-                    }
-
-                    return b;
-                }
-            }
-
-            throw new NoSuchSuppressedBlockException("Cannot find the ideal suppressed block");
-        }
-    }
-
-    public @NotNull Block delete(@NotNull Block block) {
-        if (!has(block)) {
-            throw new NoSuchBlockException("Non-member block: " + block);
-        } else if (block.isSuppressed()) {
-            throw new SuppressedBlockException("This block is already suppressed: " + block);
-        } else synchronized (this) {
-            @NotNull Block suppressedBlock = new Block(this, block.index, block.length, true);
-
-            suppressed = true;
-            blocks.remove(block);
-            blocks.add(suppressedBlock);
-
-            return suppressedBlock;
-        }
-    }
-
-    // todo improved this
-    private void writeData(byte @NotNull [] data) throws IOException {
-        int l = Math.min(getRemaining(), Math.min(data.length, Block.MAX_SIZE));
-
-        synchronized (this) {
-            file.write(data, 0, l);
-            size += l;
-            offset = Math.toIntExact(file.getFilePointer());
-        }
+        return Chunk.MAX_SIZE - size;
     }
 
     public @Unmodifiable @NotNull Set<@NotNull Block> getBlocks() {
@@ -203,7 +207,7 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
 
     // Classes
 
-    public static final class Block {
+    public static final class Block implements Comparable<@NotNull Block> {
 
         private static final int MAX_SIZE = 16 * 1024 * 1024; // 16 MB
 
@@ -228,7 +232,7 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
             return chunk;
         }
 
-        public boolean canWrite(byte @NotNull [] data) {
+        public boolean canRewrite(byte @NotNull [] data) {
             return suppressed && (data.length >= this.length);
         }
 
@@ -254,6 +258,11 @@ public final class Chunk implements Iterable<Chunk.@NotNull Block> {
         @Override
         public int hashCode() {
             return Objects.hash(index, length, suppressed);
+        }
+
+        @Override
+        public int compareTo(@NotNull Block o) {
+            return Integer.compare(index, o.index);
         }
     }
 }
